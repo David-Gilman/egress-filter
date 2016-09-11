@@ -28,7 +28,7 @@ setup(
     packages=find_packages(),
 
     description=u"Template for creating python modules.",
-    long_description=read(u'README.md'),
+    long_description=read(u'README.rst'),
 
     keywords=[u'example'],
     classifiers=[],
@@ -40,7 +40,7 @@ setup(
 
     # Reference any non-python files to be included here
     package_data={
-        '': ['*.md', '*.db', '*.txt'],  # Include all files from any package that contains *.db/*.md/*.txt
+        '': ['*.md', '*.rst', '*.db', '*.txt'],  # Include all files from any package that contains *.db/*.md/*.txt
         'example_module.resources': ['*.*', '**/*.*', '**/**/*.*'],  # Folders up to 2 levels deep will be included
     },
 
