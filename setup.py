@@ -3,36 +3,35 @@ import os
 from setuptools import setup, find_packages
 
 
-# Create release using: python setup.py sdist --format=zip
-# When creating a release please also merge to master and add a tag in the format "Release-1.0.0"
+def read(filename):
 
-
-def read(fname):
     """
-    Utility function to read the README file.
-    Used for the long_description.  It's nice, because now 1) we have a top level
-    README file and 2) it's easier to type in the README file than to put a raw
-    string in below ...
+    Utility function used to read the README file into the long_description.
 
-    :param fname: Filename to read
+    :param filename: Filename to read
 
     :return: file pointer
     """
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
+    return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
 
 setup(
-    name=u"Python Module Template",
+    name=u"example_module",  # The module name must match this!
 
     version=u"0.0.1",
     author=u"Oli Davis",
     author_email=u"oli.davis@me.com",
-    url=u'https://bitbucket.org/davisowb/owbd-python-module-template.git',
+    url=u'https://bitbucket.org/davisowb/owbd-python-module-template.git',  # Use the url to the git repo
+    download_url=u'https://bitbucket.org/davisowb/owbd-python-module-template.git/get/0.0.1.tar',
 
     packages=find_packages(),
 
     description=u"Template for creating python modules.",
     long_description=read(u'README.md'),
+
+    keywords=[u'example'],
+    classifiers=[],
 
     # Dependencies
     install_requires=[
