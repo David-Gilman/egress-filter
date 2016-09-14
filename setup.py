@@ -3,6 +3,9 @@ import os
 from setuptools import setup, find_packages
 
 
+VERSION = u'0.0.1'
+
+
 def read(filename):
 
     """
@@ -22,7 +25,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=u"0.0.1",
+    version=VERSION,
 
     author=u"Oli Davis",
     author_email=u"oli.davis@me.com",
@@ -30,7 +33,8 @@ setup(
     license=u'MIT',
 
     url=u'https://bitbucket.org/davisowb/owbd-python-module-template.git',  # Use the url to the git repo
-    download_url=u'https://bitbucket.org/davisowb/owbd-python-module-template.git/get/0.0.1.tar',
+    download_url=u'https://bitbucket.org/davisowb/'
+                 u'owbd-python-module-template.git/get/{version}.tar'.format(version=VERSION),
 
     packages=find_packages(),
 
