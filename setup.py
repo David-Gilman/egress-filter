@@ -1,9 +1,13 @@
 
 import os
+import re
 from setuptools import setup, find_packages
 
 
-VERSION = u'0.0.1'
+MODULE_NAME = u'example_module'  # The module name must match this!
+
+metadata_file = open(os.path.join(MODULE_NAME, u'_metadata.py')).read()
+metadata = dict(re.findall("__([a-z]+)__\s*=\s*u'([^']+)'", metadata_file))
 
 
 def read(filename):
@@ -20,21 +24,20 @@ def read(filename):
 
 
 setup(
-    name=u"example_module",  # The module name must match this!
+    name=MODULE_NAME,
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=VERSION,
+    version=metadata.get(u'version'),
 
-    author=u"Oli Davis",
-    author_email=u"oli.davis@me.com",
+    author=metadata.get(u'author'),
+    author_email=metadata.get(u'authoremail'),
 
-    license=u'MIT',
+    license=metadata.get(u'license'),
 
-    url=u'https://bitbucket.org/davisowb/owbd-python-module-template.git',  # Use the url to the git repo
-    download_url=u'https://bitbucket.org/davisowb/'
-                 u'owbd-python-module-template.git/get/{version}.tar'.format(version=VERSION),
+    url=metadata.get(u'url'),
+    download_url=metadata.get(u'downloadurl'),
 
     packages=find_packages(),
 
@@ -42,7 +45,7 @@ setup(
     # this and comment out packages:
     #   py_modules=["my_module"],
 
-    description=u"Template for creating python modules.",
+    description=metadata.get(u'description'),
     long_description=read(u'README.rst'),
 
     keywords=[u'example'],
