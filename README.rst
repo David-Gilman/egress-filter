@@ -1,6 +1,6 @@
 
-Template Python Module
+PyDNServer
 ========================
 
-Provides a simple template for the creation of python modules
+Provides a very simple DNS server.
 

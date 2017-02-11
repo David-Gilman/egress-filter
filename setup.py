@@ -4,7 +4,7 @@ import re
 from setuptools import setup, find_packages
 
 
-MODULE_NAME = u'example_module'  # The module name must match this!
+MODULE_NAME = u'pydnserver'  # The module name must match this!
 
 metadata_file = open(os.path.join(MODULE_NAME, u'_metadata.py')).read()
 metadata = dict(re.findall("__([a-z]+)__\s*=\s*u'([^']+)'", metadata_file))
@@ -84,7 +84,7 @@ setup(
     # Reference any non-python files to be included here
     package_data={
         '': ['*.md', '*.rst', '*.db', '*.txt'],  # Include all files from any package that contains *.db/*.md/*.txt
-        'example_module.resources': ['*.*', '**/*.*', '**/**/*.*'],  # Folders up to 2 levels deep will be included
+        'pydnserver.resources': ['*.*', '**/*.*', '**/**/*.*'],  # Folders up to 2 levels deep will be included
     },
 
     # To provide executable scripts, use entry points in preference to the
