@@ -43,7 +43,7 @@ class TestConfiguration(unittest.TestCase):
                          u'Get forwarders by interface failed')
 
     def test_get_forwarders_by_bad_interface(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(dns_forwarders.NoForwardersConfigured):
             _ = dns_forwarders.get_forwarders_by_interface(u'DoesNotExist')
 
     def test_get_forwarders_by_interface_no_forwarders(self):
