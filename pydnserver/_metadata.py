@@ -1,5 +1,5 @@
 
-__version__ = u'0.0.1'
+__version__ = u'1.0.0'
 
 __author__ = u'Oli Davis & Hywel Thomas'
 __authorshort__ = u'OWBD_HT'
