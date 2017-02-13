@@ -79,7 +79,7 @@ setup(
     # Dependencies
     install_requires=[
         u'pip>=8.1.2',
-        u'logging-helper>=1.3.2',
+        u'logging-helper>=1.3.1',
         u'configurationutil==1.1.0'
     ],
 
