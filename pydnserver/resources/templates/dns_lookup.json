@@ -1,0 +1,7 @@
+{
+  "example.com": {
+    "redirect_hostname": "alt.example.com",
+    "address": "default",
+    "active": false
+  }
+}

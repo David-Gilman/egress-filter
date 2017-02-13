@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "description": "Schema for PyDNServer DNS forwarder config",
+
+  "definitions": {
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+
+  "type": "object",
+  "additionalProperties": { "$ref": "#/definitions/interfaces" }
+}
