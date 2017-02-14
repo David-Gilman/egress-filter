@@ -81,7 +81,7 @@ setup(
         u'pip>=8.1.2',
         u'dnspython>=1.14.0',
         u'logging-helper>=1.3.1',
-        u'configurationutil==1.2.1'
+        u'configurationutil==1.2.2'
     ],
 
     # Reference any non-python files to be included here
