@@ -56,12 +56,12 @@ class DNSQuery(object):
                     if address.lower() == u'default':
                         address = self.interface
                         self.message += (u'Redirecting to default address.'.format(address=address))
-
                     else:
                         self.message += (u'Redirecting to address.'.format(address=address))
-                        self.ip = address
 
-                else:
+                    self.ip = address
+
+                else:       
 
                     redirection = redirect_record[dns_lookup.REDIRECT_HOSTNAME]
 
