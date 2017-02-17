@@ -15,9 +15,7 @@ cfg_params.APP_VERSION = __version__
 DNS_LOOKUP_CFG = u'dns_lookup'
 TEMPLATE = templates.dns_lookup
 
-# Define constants for DB columns.
-# This will need to change if the schema for the table changes.
-HOSTNAME = u'hostname'
+# Constants for accessing config items
 REDIRECT_HOSTNAME = u'redirect_hostname'
 REDIRECT_ADDRESS = u'address'
 ACTIVE = u'active'
