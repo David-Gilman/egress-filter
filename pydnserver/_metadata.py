@@ -1,4 +1,6 @@
 
+__module_name__ = u'PyDNServer'
+
 __version__ = u'1.0.3'
 
 __author__ = u'Oli Davis & Hywel Thomas'
