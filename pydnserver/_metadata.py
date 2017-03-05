@@ -1,5 +1,7 @@
 
-__version__ = u'1.0.2'
+__module_name__ = u'PyDNServer'
+
+__version__ = u'1.0.3'
 
 __author__ = u'Oli Davis & Hywel Thomas'
 __authorshort__ = u'OWBD_HT'

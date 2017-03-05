@@ -1,13 +1,13 @@
 
 import logging_helper
-from _metadata import __version__, __authorshort__
+from _metadata import __version__, __authorshort__, __module_name__
 from resources import templates, schema
 from configurationutil import Configuration, cfg_params
 
 logging = logging_helper.setup_logging()
 
 # Register Config details (These are expected to be overwritten by an importing app)
-cfg_params.APP_NAME = u'PyDNServer'
+cfg_params.APP_NAME = __module_name__
 cfg_params.APP_AUTHOR = __authorshort__
 cfg_params.APP_VERSION = __version__
 
@@ -38,7 +38,7 @@ def get_all_forwarders(interface=None):
         try:
             dns_forwarders = cfg[key]
 
-        except LookupError as err:
+        except KeyError as err:
             raise NoForwardersConfigured(err)
 
         else:
