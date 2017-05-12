@@ -38,7 +38,7 @@ def get_all_forwarders(interface=None):
         try:
             dns_forwarders = cfg[key]
 
-        except LookupError as err:
+        except KeyError as err:
             raise NoForwardersConfigured(err)
 
         else:
