@@ -45,7 +45,7 @@ class DNSQuery(object):
                 redirect_record = dns_lookup.get_active_redirect_record_for_host(name)
 
             except dns_lookup.NoActiveRecordForHost:
-                self.message += u'Forward request. '
+                self.message += u'Forwarding request. '
                 address = self.__forward_request(name)
                 self.ip = address
 
@@ -143,7 +143,7 @@ class DNSQuery(object):
                                                                                                  source=self.interface,
                                                                                                  address=address))
 
-        except (IndexError, dns.exception.Timeout) as err:
+        except (IndexError, dns.exception.DNSException, dns.exception.Timeout) as err:
             self.message += u'(dns.resolver failed). '
             raise DNSQueryFailed(u'dns.resolver failed: {err}'.format(err=err))
 
