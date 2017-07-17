@@ -112,10 +112,10 @@ class AddEditNameserverFrame(BaseFrame):
             logging.error(u'Cannot save record')
             logging.error(err)
 
-        self.parent.master.destroy()
+        self.parent.master.exit()
 
     def __cancel(self):
-        self.parent.master.destroy()
+        self.parent.master.exit()
 
 
 class AddEditNameserverWindow(ChildWindow):
