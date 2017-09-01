@@ -11,7 +11,7 @@ from networkutil.gui.ip_widget import IPv4Entry
 from uiutil.frame.frame import BaseFrame
 from uiutil.helper.layout import nice_grid
 from uiutil.window.child import ChildWindow
-from tableutil.table import Table, make_multi_line_list
+from tableutil import Table, make_multi_line_list
 from pydnserver import dns_forwarders
 from configurationutil import Configuration
 
