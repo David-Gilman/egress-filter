@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import six
 import tkMessageBox
 import ttk
 from Tkconstants import NORMAL, HORIZONTAL, E, W, S, EW, NSEW
@@ -205,7 +206,7 @@ class NameserversConfigFrame(BaseFrame):
                   pady=5)
 
         select_next_row = True
-        for interface, forwarders in dns_forwarders.get_all_forwarders().iteritems():
+        for interface, forwarders in six.iteritems(dns_forwarders.get_all_forwarders()):
 
             row = self.record_frame.row.next()
 
