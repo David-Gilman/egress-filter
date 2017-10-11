@@ -180,7 +180,7 @@ class NameserversConfigFrame(BaseFrame):
                 title=make_multi_line_list(u"Requests arriving at 192.168.2.50"
                                            u"are resolved using the nameservers"
                                            u"172.20.220.25 and 172.20.220.26"),
-                table_format=Table.LIGHT_TABLE_FORMAT).as_text()
+                table_format=Table.LIGHT_TABLE_FORMAT).text()
 
         self.label(frame=self.record_frame,
                    text=u'Interface',
