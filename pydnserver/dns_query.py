@@ -25,61 +25,38 @@ class DNSQuery(object):
 
     def resolve(self):
 
+        name = self._decode_query()
+
+        if name[-1] == u'.':
+            name = name[:-1]
+
+        self.message = (u'DNS ({dns}): {name}: ?.?.?.?. '
+                        .format(dns=self.interface,
+                                name=name))
+
+        # Handle reverse lookups
+        if u'.in-addr.arpa.' in name:
+            # TODO: Can we not just forward these?
+            self.error = u'Cannot handle reverse lookups yet!'
+            return self._bad_reply()
+
+        # Check if we have a configured record for requested name
         try:
-            name = self.__decode_query()
+            redirect_record = dns_lookup.get_active_redirect_record_for_host(name)
 
-            if name[-1] == u'.':
-                name = name[:-1]
-
-            self.message = (u'DNS ({dns}): {name}: ?.?.?.?. '
-                            .format(dns=self.interface,
-                                    name=name))
-
-            # Handle reverse lookups
-            if u'.in-addr.arpa.' in name:
-                raise DNSQueryFailed(u'Cannot handle reverse lookups yet!')
-
-            # Check if we have a configured record for requested name
-            try:
-                redirect_record = dns_lookup.get_active_redirect_record_for_host(name)
-
-            except dns_lookup.NoActiveRecordForHost:
-                self.message += u'Forwarding request. '
-                address = self.__forward_request(name)
-                self.ip = address
-
-            else:
-                address = redirect_record[dns_lookup.REDIRECT_ADDRESS]
-
-                if address != u'':  # TODO: Convert this to a None field!
-                    if address.lower() == u'default':
-                        address = self.interface
-                        self.message += (u'Redirecting to default address.'.format(address=address))
-                    else:
-                        self.message += (u'Redirecting to address.'.format(address=address))
-
-                    self.ip = address
-
-                else:       
-
-                    redirection = redirect_record[dns_lookup.REDIRECT_HOSTNAME]
-
-                    redirected_address = self.__forward_request(redirection)
-
-                    self.message += (u'Redirecting to {redirection}'.format(redirection=redirection))
-
-                    self.ip = redirected_address
-
-            self.message = self.message.replace(u'?.?.?.?', self.ip)
-
-        except DNSQueryFailed as error:
-            self.error = error
-            return self.__bad_reply()
+        except dns_lookup.NoActiveRecordForHost:
+            self.message += u'Forwarding request. '
+            address = self._forward_request(name)
+            self.ip = address
 
         else:
-            return self.__reply()
+            self._redirect_request(redirect_record)
 
-    def __decode_query(self):
+        self.message = self.message.replace(u'?.?.?.?', self.ip)
+
+        return self._reply()
+
+    def _decode_query(self):
 
         domain = ''
         optype = (ord(self.data[2]) >> 3) & 15   # Opcode bits
@@ -94,20 +71,44 @@ class DNSQuery(object):
 
         return domain
 
-    def __forward_request(self,
-                          name):
+    def _redirect_request(self,
+                          redirect_host):
+
+        #address = redirect_host[dns_lookup.REDIRECT_ADDRESS]
+        address = u''  # TODO: This functionality is removed... disabling (we may need the code elsewhere)
+
+        if address != u'':  # TODO: Convert this to a None field!
+            if address.lower() == u'default':
+                address = self.interface
+                self.message += (u'Redirecting to default address.'.format(address=address))
+            else:
+                self.message += (u'Redirecting to address.'.format(address=address))
+
+            self.ip = address
+
+        else:
+            redirection = redirect_host[dns_lookup.REDIRECT_HOST]
+
+            redirected_address = self._forward_request(redirection)
+
+            self.message += (u'Redirecting to {redirection}'.format(redirection=redirection))
+
+            self.ip = redirected_address
+
+    def _forward_request(self,
+                         name):
 
         try:
-            address = self.__resolve_name_using_dns_resolver(name)
+            address = self._resolve_name_using_dns_resolver(name)
 
         except (dns_forwarders.NoForwardersConfigured, DNSQueryFailed):
             self.message += u'No passthrough nameservers. '
-            address = self.__resolve_name_using_socket(name)
+            address = self._resolve_name_using_socket(name)
 
         return address
 
-    def __resolve_name_using_socket(self,
-                                    name):
+    def _resolve_name_using_socket(self,
+                                   name):
 
         # TODO: Ought to add some basic checking of name here
 
@@ -115,14 +116,14 @@ class DNSQuery(object):
             address = socket.gethostbyname(name)
             self.message += u"(socket)."
 
-        except socket.gaierror, err:
+        except socket.gaierror as err:
             raise DNSQueryFailed(u'Resolve using socket failed: {err}'.format(err=err))
 
         else:
             return address
 
-    def __resolve_name_using_dns_resolver(self,
-                                          name):
+    def _resolve_name_using_dns_resolver(self,
+                                         name):
 
         resolver = dns.resolver.Resolver()
         resolver.timeout = 1
@@ -149,8 +150,8 @@ class DNSQuery(object):
         else:
             return address
 
-    def __reply(self,
-                ip=None):
+    def _reply(self,
+               ip=None):
 
         ip = ip if ip is not None else self.ip
 
@@ -164,7 +165,7 @@ class DNSQuery(object):
 
         return packet
 
-    def __bad_reply(self):
+    def _bad_reply(self):
             # TODO: Figure out how to return rcode 2 or 3
             # DNS Response Code | Meaning
             # ------------------+-----------------------------------------
@@ -174,4 +175,4 @@ class DNSQuery(object):
             logging.warning(self.error)
             # For now, return localhost,
             # which should fail on the calling machine
-            return self.__reply(ip=u'127.0.0.1')
+            return self._reply(ip=u'127.0.0.1')
