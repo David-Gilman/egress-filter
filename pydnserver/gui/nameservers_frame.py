@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import six
 import tkMessageBox
 import ttk
 from Tkconstants import NORMAL, HORIZONTAL, E, W, S, EW, NSEW
 from Tkinter import StringVar
+from future.utils import iteritems
 from collections import OrderedDict
 import logging_helper
 from networkutil.gui.ip_widget import IPv4Entry
@@ -206,7 +206,7 @@ class NameserversConfigFrame(BaseFrame):
                   pady=5)
 
         select_next_row = True
-        for interface, forwarders in six.iteritems(dns_forwarders.get_all_forwarders()):
+        for interface, forwarders in iteritems(dns_forwarders.get_all_forwarders()):
 
             row = self.record_frame.row.next()
 
