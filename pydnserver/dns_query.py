@@ -3,14 +3,10 @@
 import socket
 import dns.resolver
 import logging_helper
-import dns_lookup
-import dns_forwarders
+from .config import dns_lookup, dns_forwarders
+from ._exceptions import DNSQueryFailed
 
 logging = logging_helper.setup_logging()
-
-
-class DNSQueryFailed(Exception):
-    pass
 
 
 class DNSQuery(object):
