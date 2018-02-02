@@ -1,8 +1,9 @@
+# encoding: utf-8
 
 import logging_helper
-from _metadata import __version__, __authorshort__, __module_name__
-from resources import templates, schema
 from configurationutil import Configuration, cfg_params
+from .._metadata import __version__, __authorshort__, __module_name__
+from ..resources import templates, schema
 
 logging = logging_helper.setup_logging()
 
@@ -12,7 +13,7 @@ cfg_params.APP_AUTHOR = __authorshort__
 cfg_params.APP_VERSION = __version__
 
 # Set the config initialisation parameters
-DNS_SERVERS_CFG = u'dns_servers'
+DNS_SERVERS_CFG = u'dns_forwarders'
 TEMPLATE = templates.dns_forwarders
 
 
@@ -56,6 +57,3 @@ def get_all_forwarders(interface=None):
 
 def get_forwarders_by_interface(interface):
     return get_all_forwarders(interface=interface)
-
-
-# TODO: Add default forwarder config

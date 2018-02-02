@@ -1,8 +1,9 @@
+# encoding: utf-8
 
 import logging_helper
-from _metadata import __version__, __authorshort__, __module_name__
-from resources import templates, schema
 from configurationutil import Configuration, cfg_params
+from .._metadata import __version__, __authorshort__, __module_name__
+from ..resources import templates, schema
 
 logging = logging_helper.setup_logging()
 
@@ -16,8 +17,7 @@ DNS_LOOKUP_CFG = u'dns_lookup'
 TEMPLATE = templates.dns_lookup
 
 # Constants for accessing config items
-REDIRECT_HOSTNAME = u'redirect_hostname'
-REDIRECT_ADDRESS = u'address'
+REDIRECT_HOST = u'redirect_host'
 ACTIVE = u'active'
 
 
@@ -58,7 +58,7 @@ def get_active_redirect_record_for_host(host):
 
 
 def get_redirect_hostname_for_host(host):
-    redirect_hostname = get_active_redirect_record_for_host(host)[REDIRECT_HOSTNAME]
+    redirect_hostname = get_active_redirect_record_for_host(host)[REDIRECT_HOST]
 
     if not redirect_hostname:
         raise NoActiveRecordForHost(u'Active record, but no hostname redirection for {host}'.format(host=host))
