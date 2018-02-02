@@ -4,7 +4,7 @@ import shutil
 import unittest
 from fdutil.path_tools import pop_path
 from configurationutil import Configuration, cfg_params
-from pydnserver import dns_forwarders
+from pydnserver.config import dns_forwarders
 
 
 class TestConfiguration(unittest.TestCase):
