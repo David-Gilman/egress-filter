@@ -6,11 +6,10 @@
     "host_config": {
       "type": "object",
       "properties": {
-        "redirect_hostname": {"type": ["string", "null"]},
-        "address": {"type": "string"},
+        "redirect_host": {"type": "string"},
         "active": {"type": "boolean"}
       },
-      "required": ["redirect_hostname", "address", "active"],
+      "required": ["redirect_host", "active"],
       "additionalProperties": false
     }
   },
