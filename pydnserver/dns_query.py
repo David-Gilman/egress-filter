@@ -1,3 +1,4 @@
+# encoding: utf-8
 
 import socket
 import dns.resolver
@@ -16,9 +17,11 @@ class DNSQuery(object):
 
     def __init__(self,
                  data,
+                 client_address=None,
                  interface=None):
 
         self.data = data
+        self.client_address = client_address
         self.interface = interface if interface is not None else u'default'
         self.message = u''
         self.ip = None
