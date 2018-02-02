@@ -87,13 +87,14 @@ setup(
     # Dependencies
     install_requires=[
         u'pip>=8.1.2',
-        u'six>=1.11.0',
+        u'future>=0.16.0',
         u'dnspython>=1.14.0',
         u'logging-helper>=1.3.1',
         u'configurationutil>=1.2.3',
         u'tableutil>=1.0.13',
         u'uiutil>=1.6.4',
-        u'networkutil>=1.8.5'
+        u'networkutil>=1.8.5',
+        u'fdutil>=1.6.0'
     ],
 
     # Reference any non-python files to be included here
