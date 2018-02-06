@@ -3,6 +3,8 @@
 import socket
 import logging_helper
 from classutils.thread_pool import ThreadPool
+from ipaddress import IPv4Network, IPv4Address, AddressValueError
+from networkutil.addressing import get_my_addresses
 from .dns_query import DNSQuery
 
 logging = logging_helper.setup_logging()
@@ -101,9 +103,26 @@ class DNSServer(ThreadPool):
             logging.debug(address)
             logging.debug(repr(request))
 
+            # Start with the server interface
+            interface = self.interface
+
+            # Try to narrow down interface from client address
+            # We are assuming a /24 network as this is the most common for LAN's
+            client_net = IPv4Network(u'{ip}/24'.format(ip=address[0]),
+                                     strict=False)
+
+            for addr in get_my_addresses():
+                try:
+                    if IPv4Address(u'{ip}'.format(ip=addr)) in client_net:
+                        interface = addr
+                        break  # We found a matching address so no point looping through remaining addresses!
+
+                except AddressValueError:
+                    pass
+
             query = DNSQuery(data=request,
                              client_address=address,
-                             interface=self.interface)
+                             interface=interface)
 
             self.server_socket.sendto(query.resolve(), address)
 
