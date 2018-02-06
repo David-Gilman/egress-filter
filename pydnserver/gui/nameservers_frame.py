@@ -8,7 +8,7 @@ from Tkconstants import NORMAL, HORIZONTAL, E, W, S, EW, NSEW
 from Tkinter import StringVar
 from collections import OrderedDict
 import logging_helper
-from networkutil.gui.ip_widget import IPv4Entry
+from networkutil.gui.ipv4_widget import IPv4Entry
 from uiutil.frame.frame import BaseFrame
 from uiutil.helper.layout import nice_grid
 from uiutil.window.child import ChildWindow
