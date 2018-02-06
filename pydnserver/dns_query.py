@@ -3,6 +3,7 @@
 import socket
 import dns.resolver
 import logging_helper
+from ipaddress import IPv4Address
 from .config import dns_lookup, dns_forwarders
 from ._exceptions import DNSQueryFailed
 
@@ -20,8 +21,17 @@ class DNSQuery(object):
         self.client_address = client_address
         self.interface = interface if interface is not None else u'default'
         self.message = u''
-        self.ip = None
+        self._ip = None
         self.error = u''
+
+    @property
+    def ip(self):
+        return self._ip
+
+    @ip.setter
+    def ip(self,
+           ip):
+        self._ip = IPv4Address(u'{ip}'.format(ip=ip))
 
     def resolve(self):
 
@@ -30,13 +40,12 @@ class DNSQuery(object):
         if name[-1] == u'.':
             name = name[:-1]
 
-        self.message = (u'DNS ({dns}): {name}: ?.?.?.?. '
-                        .format(dns=self.interface,
-                                name=name))
+        self.message = u'DNS ({dns}): {name}: ?.?.?.?. '.format(dns=self.interface,
+                                                                name=name)
 
         # Handle reverse lookups
         if u'.in-addr.arpa.' in name:
-            # TODO: Can we not just forward these?
+            # TODO: Can we not just forward these?  No will return host not IP?
             self.error = u'Cannot handle reverse lookups yet!'
             return self._bad_reply()
 
@@ -52,7 +61,7 @@ class DNSQuery(object):
         else:
             self._redirect_request(redirect_record)
 
-        self.message = self.message.replace(u'?.?.?.?', self.ip)
+        self.message = self.message.replace(u'?.?.?.?', self.ip.exploded)
 
         return self._reply()
 
@@ -102,7 +111,7 @@ class DNSQuery(object):
             address = self._resolve_name_using_dns_resolver(name)
 
         except (dns_forwarders.NoForwardersConfigured, DNSQueryFailed):
-            self.message += u'No passthrough nameservers. '
+            self.message += u'No forwarders found for request. '
             address = self._resolve_name_using_socket(name)
 
         return address
@@ -114,7 +123,7 @@ class DNSQuery(object):
 
         try:
             address = socket.gethostbyname(name)
-            self.message += u"(socket)."
+            self.message += u"(socket). "
 
         except socket.gaierror as err:
             raise DNSQueryFailed(u'Resolve using socket failed: {err}'.format(err=err))
@@ -125,10 +134,18 @@ class DNSQuery(object):
     def _resolve_name_using_dns_resolver(self,
                                          name):
 
+        try:
+            forwarders = dns_forwarders.get_forwarders_by_interface(self.interface)
+            logging.debug(u'Using forwarder config: {fwd}'.format(fwd=forwarders))
+
+        except (dns_forwarders.NoForwardersConfigured, dns_forwarders.MultipleForwardersForInterface):
+            forwarders = dns_forwarders.get_default_forwarder()
+            logging.debug(u'Using default forwarder config: {fwd}'.format(fwd=forwarders))
+
         resolver = dns.resolver.Resolver()
         resolver.timeout = 1
         resolver.lifetime = 3
-        resolver.nameservers = dns_forwarders.get_forwarders_by_interface(self.interface)
+        resolver.nameservers = forwarders
 
         try:
             result = resolver.query(qname=name,
@@ -139,9 +156,11 @@ class DNSQuery(object):
 
             self.message += u'(dns.resolver). '
 
-            logging.debug(u'Address for {name} via dns.resolver from {source}: {address}'.format(name=name,
-                                                                                                 source=self.interface,
-                                                                                                 address=address))
+            logging.debug(u'Address for {name} via dns.resolver from nameservers - {source} '
+                          u'on interface {interface}: {address}'.format(name=name,
+                                                                        source=u', '.join(forwarders),
+                                                                        interface=self.interface,
+                                                                        address=address))
 
         except (IndexError, dns.exception.DNSException, dns.exception.Timeout) as err:
             self.message += u'(dns.resolver failed). '
@@ -150,10 +169,7 @@ class DNSQuery(object):
         else:
             return address
 
-    def _reply(self,
-               ip=None):
-
-        ip = ip if ip is not None else self.ip
+    def _reply(self):
 
         packet = ''
         packet += self.data[:2] + "\x81\x80"
@@ -161,7 +177,7 @@ class DNSQuery(object):
         packet += self.data[12:]                                            # Original Domain Name Question
         packet += '\xc0\x0c'                                                # Pointer to domain name
         packet += '\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'                # Response type, ttl and resource data length -> 4 bytes
-        packet += str.join('', map(lambda x: chr(int(x)), ip.split('.')))   # 4 bytes of IP
+        packet += self.ip.packed                                            # 4 bytes of IP
 
         return packet
 
@@ -175,4 +191,6 @@ class DNSQuery(object):
             logging.warning(self.error)
             # For now, return localhost,
             # which should fail on the calling machine
-            return self._reply(ip=u'127.0.0.1')
+            self.ip = u'127.0.0.1'
+
+            return self._reply()
