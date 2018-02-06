@@ -28,8 +28,6 @@ class ZoneConfigFrame(BaseFrame):
 
         self.cfg = Configuration()
 
-        self.endpoints = Endpoints()
-
         self.dns_radio_list = {}
         self.dns_active_var_list = {}
         self.dns_active_list = {}
@@ -98,7 +96,7 @@ class ZoneConfigFrame(BaseFrame):
             text = host_config[u'redirect_host']
 
             # Check for a friendly name for host
-            friendly_name = self._lookup_friendly_name(text)
+            friendly_name = self._convert_host_to_friendly_name(text)
 
             if friendly_name is not None:
                 text = u'{name} ({host})'.format(name=friendly_name,
@@ -226,12 +224,12 @@ class ZoneConfigFrame(BaseFrame):
 
         self.cfg[key] = flag.get()
 
-    def _lookup_friendly_name(self,
-                              host):
+    @staticmethod
+    def _convert_host_to_friendly_name(host):
 
         try:
             # Attempt to lookup friendly name
-            return self.endpoints.get_environment_for_host(host)
+            return Endpoints().get_environment_for_host(host)
 
         except LookupError:
             logging.debug(u'No friendly name available for host: {host}'.format(host=host))

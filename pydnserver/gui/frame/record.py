@@ -8,6 +8,7 @@ from uiutil.widget.label import Label
 from uiutil.widget.button import Button
 from uiutil.widget.combobox import Combobox
 from configurationutil import Configuration
+from tkinter.messagebox import showerror
 from tkinter.constants import NORMAL, DISABLED, E, EW
 from networkutil.endpoint_config import Endpoints, EnvAndAPIs
 from fdutil.string_tools import make_multi_line_list
@@ -62,17 +63,14 @@ class AddEditRecordFrame(BaseFrame):
 
         existing_endpoints = dns_lookup.get_redirection_config().keys()
 
-        host_endpoints = set([endpoint.hostname
-                              for endpoint in self.endpoints
-                              if endpoint.hostname not in (u'Body.all',
-                                                           u'URI.all',
-                                                           u'Header.all')])
-
+        host_endpoints = set([endpoint.hostname for endpoint in self.endpoints])
         host_endpoints = list(host_endpoints.difference(existing_endpoints))
         host_endpoints = sorted(host_endpoints)
 
+        initial_host = host_endpoints[0] if len(host_endpoints) > 0 else u''
+
         self._host = Combobox(frame=self,
-                              initial_value=self.selected_host if self.edit else host_endpoints[0],
+                              initial_value=self.selected_host if self.edit else initial_host,
                               values=host_endpoints,
                               state=DISABLED if self.edit else NORMAL,
                               row=self.row.current,
@@ -121,43 +119,36 @@ class AddEditRecordFrame(BaseFrame):
                                    column=self.column.next())
 
     def _save(self):
-        redirect_name = self._host.value
-        redirect_hostname = self._redirect.value
+        redirect_host = self._host.value
+        redirect_name = self._redirect.value
+
+        logging.debug(redirect_host)
+        logging.debug(redirect_name)
 
         try:
-            if redirect_hostname.strip() == u'':
-                # TODO: Handle this better
+            if redirect_name.strip() == u'':
                 raise Exception(u'redirect host cannot be blank!')
 
-            else:
-                # TODO: What are we achieving here??
-                apis = self.endpoints.get_apis_for_host(redirect_name)
+            self._convert_friendly_name_to_host(host=redirect_host,
+                                                name=redirect_name)
 
-                for api in apis:
-                    try:
-                        matched_endpoint = self.endpoints.get_endpoint_for_api_and_environment(
-                                                api=api,
-                                                environment=redirect_hostname)
-
-                        redirect_hostname = matched_endpoint.hostname
-                        break  # We got one!
-
-                    except ValueError:
-                        pass
-
-            values = {dns_lookup.REDIRECT_HOST: redirect_hostname,
+            values = {dns_lookup.REDIRECT_HOST: redirect_name,
                       dns_lookup.ACTIVE: self.selected_host_config[dns_lookup.ACTIVE] if self.edit else False}
 
             key = u'{cfg}.{h}'.format(cfg=dns_lookup.DNS_LOOKUP_CFG,
-                                      h=redirect_name)
+                                      h=redirect_host)
+
+            logging.debug(values)
 
             self.cfg[key] = values
 
-        except Exception as err:
-            logging.error(u'Cannot save record, Does the endpoint exist?')
-            logging.exception(err)
+            self.parent.master.exit()
 
-        self.parent.master.exit()
+        except Exception as err:
+            logging.error(u'Cannot save record')
+            logging.exception(err)
+            showerror(title=u'Save Failed',
+                      message=u'Cannot Save forwarder: {err}'.format(err=err))
 
     def _cancel(self):
         self.parent.master.exit()
@@ -171,13 +162,12 @@ class AddEditRecordFrame(BaseFrame):
             redirect_environments = set()
 
             for host_api in host_apis:
-                redirect_environments.update(
-                    set(self.env_and_apis.get_environments_for_api(host_api)))
+                redirect_environments.update(set(self.env_and_apis.get_environments_for_api(host_api)))
 
             redirect_environments.add(self.DEFAULT_REDIRECT)
 
             # Check for a friendly name for host
-            friendly_name = self._lookup_friendly_name(host)
+            friendly_name = self._convert_host_to_friendly_name(host)
 
             if friendly_name is not None:
                 redirect_environments.remove(friendly_name)
@@ -224,13 +214,38 @@ class AddEditRecordFrame(BaseFrame):
 
         return tooltip_text
 
-    def _lookup_friendly_name(self,
-                              host):
+    @staticmethod
+    def _convert_host_to_friendly_name(host):
 
         try:
             # Attempt to lookup friendly name
-            return self.endpoints.get_environment_for_host(host)
+            return Endpoints().get_environment_for_host(host)
 
         except LookupError:
             logging.debug(u'No friendly name available for host: {host}'.format(host=host))
             return None
+
+    @staticmethod
+    def _convert_friendly_name_to_host(host,
+                                       name):
+
+        endpoints = Endpoints()
+
+        apis = endpoints.get_apis_for_host(host)
+        logging.debug(apis)
+
+        for api in apis:
+            try:
+                matched_endpoint = endpoints.get_endpoint_for_api_and_environment(
+                    api=api,
+                    environment=name)
+
+                logging.debug(matched_endpoint)
+
+                name = matched_endpoint.hostname
+                break  # We got one!
+
+            except ValueError:
+                pass
+
+        return name
