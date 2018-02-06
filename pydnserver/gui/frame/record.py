@@ -213,7 +213,6 @@ class AddEditRecordFrame(BaseFrame):
     @property
     def tooltip(self):
 
-        # TODO: Update examples to be generic!
         tooltip_text = u"Examples:\n"
 
         example = OrderedDict()
