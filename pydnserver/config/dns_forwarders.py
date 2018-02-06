@@ -2,6 +2,7 @@
 
 import logging_helper
 from configurationutil import Configuration, cfg_params
+from ipaddress import IPv4Network, IPv4Address
 from .._metadata import __version__, __authorshort__, __module_name__
 from ..resources import templates, schema
 
@@ -16,8 +17,14 @@ cfg_params.APP_VERSION = __version__
 DNS_SERVERS_CFG = u'dns_forwarders'
 TEMPLATE = templates.dns_forwarders
 
+DEFAULT_FORWARDER = u'0.0.0.0'
+
 
 class NoForwardersConfigured(Exception):
+    pass
+
+
+class MultipleForwardersForInterface(Exception):
     pass
 
 
@@ -49,6 +56,16 @@ def get_all_forwarders(interface=None):
     else:
         dns_forwarders = cfg[DNS_SERVERS_CFG]
 
+        if interface is not None:
+            # Only pass the forwarders that match the interface! (should only be one)
+            dns_forwarders = [forwarder
+                              for forwarder in dns_forwarders
+                              if IPv4Address(interface) in IPv4Network(forwarder)]
+
+            if len(dns_forwarders) > 1:
+                raise MultipleForwardersForInterface(u'There should only be one configuration per interface, '
+                                                     u'not counting the default forwarder!')
+
     logging.debug(dns_forwarders)
 
     # Return a copy so that modifications of the retrieved do not get modified in config unless explicitly requested!
@@ -57,3 +74,7 @@ def get_all_forwarders(interface=None):
 
 def get_forwarders_by_interface(interface):
     return get_all_forwarders(interface=interface)
+
+
+def get_default_forwarder():
+    return get_all_forwarders(interface=DEFAULT_FORWARDER)
