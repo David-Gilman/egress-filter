@@ -1,11 +1,16 @@
 # encoding: utf-8
 
 import logging_helper
-from tkinter import StringVar
-from tkinter.constants import NORMAL, DISABLED, HORIZONTAL, W, EW
-from networkutil.endpoint_config import Endpoints, EnvAndAPIs
-from uiutil.frame.frame import BaseFrame
+from tableutil import Table
+from collections import OrderedDict
+from uiutil.frame import BaseFrame
+from uiutil.widget.label import Label
+from uiutil.widget.button import Button
+from uiutil.widget.combobox import Combobox
 from configurationutil import Configuration
+from tkinter.constants import NORMAL, DISABLED, E, EW
+from networkutil.endpoint_config import Endpoints, EnvAndAPIs
+from fdutil.string_tools import make_multi_line_list
 from ...config import dns_lookup
 
 logging = logging_helper.setup_logging()
@@ -21,7 +26,9 @@ class AddEditRecordFrame(BaseFrame):
                  *args,
                  **kwargs):
 
-        BaseFrame.__init__(self, *args, **kwargs)
+        BaseFrame.__init__(self,
+                           *args,
+                           **kwargs)
 
         self.edit = edit
 
@@ -43,16 +50,15 @@ class AddEditRecordFrame(BaseFrame):
         else:
             self.selected_host = selected_record
 
-        label_column = self.column.start()
-        entry_column = self.column.next()
-        self.columnconfigure(entry_column, weight=1)
-        cancel_column = self.column.next()
-        save_column = self.column.next()
+        self._draw()
 
-        self.label(text=u'Hostname:',
-                   row=self.row.next(),
-                   column=label_column,
-                   sticky=W)
+    def _draw(self):
+
+        Label(text=u'Host:',
+              row=self.row.next(),
+              column=self.column.start(),
+              sticky=E,
+              tooltip=self.tooltip)
 
         existing_endpoints = dns_lookup.get_redirection_config().keys()
 
@@ -65,63 +71,58 @@ class AddEditRecordFrame(BaseFrame):
         host_endpoints = list(host_endpoints.difference(existing_endpoints))
         host_endpoints = sorted(host_endpoints)
 
-        self.__host_var = StringVar(self.parent)
-        self.__host_var.set(self.selected_host if self.edit else host_endpoints[0])
-        self.__host = self.combobox(textvariable=self.__host_var,
-                                    values=host_endpoints,
-                                    state=DISABLED if self.edit else NORMAL,
-                                    row=self.row.current,
-                                    column=entry_column,
-                                    sticky=EW,
-                                    columnspan=3)
+        self._host = Combobox(frame=self,
+                              initial_value=self.selected_host if self.edit else host_endpoints[0],
+                              values=host_endpoints,
+                              state=DISABLED if self.edit else NORMAL,
+                              row=self.row.current,
+                              column=self.column.next(),
+                              sticky=EW,
+                              columnspan=3)
 
-        self.rowconfigure(self.row.current,
-                          weight=1)
+        self.rowconfigure(self.row.current, weight=1)
+        self.columnconfigure(self.column.current, weight=1)
 
-        self.label(text=u'Redirect:',
-                   row=self.row.next(),
-                   column=label_column,
-                   sticky=W)
+        Label(text=u'Redirect:',
+              row=self.row.next(),
+              column=self.column.start(),
+              sticky=E,
+              tooltip=self.tooltip)
 
-        self.__redirect_var = StringVar(self.parent)
-        self.__redirect_var.set(self.selected_host_config[dns_lookup.REDIRECT_HOST]
-                                if self.edit else u'')
-        self.__redirect = self.combobox(textvariable=self.__redirect_var,
-                                        row=self.row.current,
-                                        column=entry_column,
-                                        sticky=EW,
-                                        columnspan=3)
+        self._redirect = Combobox(frame=self,
+                                  initial_value=self.selected_host_config[dns_lookup.REDIRECT_HOST]
+                                  if self.edit else u'',
+                                  row=self.row.current,
+                                  column=self.column.next(),
+                                  sticky=EW,
+                                  columnspan=3)
 
         self.populate_redirect_list()
 
-        self.rowconfigure(self.row.current,
-                          weight=1)
+        self.rowconfigure(self.row.current, weight=1)
 
-        self.separator(orient=HORIZONTAL,
-                       row=self.row.next(),
-                       column=label_column,
-                       columnspan=4,
-                       sticky=EW,
-                       padx=5,
-                       pady=5)
+        self.horizontal_separator(row=self.row.next(),
+                                  column=self.column.start(),
+                                  columnspan=4,
+                                  sticky=EW,
+                                  padx=5,
+                                  pady=5)
 
-        self.__cancel_button = self.button(state=NORMAL,
-                                           text=u'Cancel',
-                                           width=15,
-                                           command=self.__cancel,
-                                           row=self.row.next(),
-                                           column=cancel_column)
+        self._cancel_button = Button(text=u'Cancel',
+                                     width=15,
+                                     command=self._cancel,
+                                     row=self.row.next(),
+                                     column=self.column.next())
 
-        self.__save_button = self.button(state=NORMAL,
-                                         text=u'Save',
-                                         width=15,
-                                         command=self.__save,
-                                         row=self.row.current,
-                                         column=save_column)
+        self._save_button = Button(text=u'Save',
+                                   width=15,
+                                   command=self._save,
+                                   row=self.row.current,
+                                   column=self.column.next())
 
-    def __save(self):
-        redirect_name = self.__host_var.get()
-        redirect_hostname = self.__redirect_var.get()
+    def _save(self):
+        redirect_name = self._host.value
+        redirect_hostname = self._redirect.value
 
         try:
             if redirect_hostname.strip() == u'':
@@ -138,7 +139,6 @@ class AddEditRecordFrame(BaseFrame):
                                                 api=api,
                                                 environment=redirect_hostname)
 
-                        # TODO: Figure this out???
                         redirect_hostname = matched_endpoint.hostname
                         break  # We got one!
 
@@ -159,11 +159,11 @@ class AddEditRecordFrame(BaseFrame):
 
         self.parent.master.exit()
 
-    def __cancel(self):
+    def _cancel(self):
         self.parent.master.exit()
 
     def populate_redirect_list(self):
-        host = self.__host_var.get()
+        host = self._host.value
 
         try:
             host_apis = self.endpoints.get_apis_for_host(host)
@@ -203,9 +203,26 @@ class AddEditRecordFrame(BaseFrame):
             except (IndexError, TypeError):
                 env = self.DEFAULT_REDIRECT
 
-            self.__redirect.config(values=redirect_environments)
-            self.__redirect.current(redirect_environments.index(env))
-            self.__redirect_var.set(env)
+            self._redirect.config(values=redirect_environments)
+            self._redirect.current(redirect_environments.index(env))
+            self._redirect.set(env)
 
         except KeyError:
             logging.error(u'Cannot load redirect list, Invalid hostname!')
+
+    @property
+    def tooltip(self):
+
+        # TODO: Update examples to be generic!
+        tooltip_text = u"Examples:\n"
+
+        example = OrderedDict()
+        example[u'Host'] = u'google.com'
+        example[u'Redirect'] = u'google.co.uk'
+
+        tooltip_text += Table.init_from_tree(example,
+                                             title=make_multi_line_list(u"requests for 'google.com' "
+                                                                        u"are diverted to 'google.co.uk'"),
+                                             table_format=Table.LIGHT_TABLE_FORMAT).text() + u'\n'
+
+        return tooltip_text

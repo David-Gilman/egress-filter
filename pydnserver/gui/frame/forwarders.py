@@ -2,14 +2,14 @@
 
 import logging_helper
 from tkinter import ttk, StringVar
-from tkinter.messagebox import askquestion
+from tkinter.messagebox import askquestion, showerror
 from tkinter.constants import HORIZONTAL, E, W, S, EW, NSEW
 from future.utils import iteritems
 from uiutil.frame.frame import BaseFrame
 from uiutil.helper.layout import nice_grid
 from configurationutil import Configuration
 from ...config import dns_forwarders
-from ..window.forwarder import AddEditForwarderWindow
+from ..window.forwarder import AddEditForwarderWindow, AddEditForwarderFrame
 
 logging = logging_helper.setup_logging()
 
@@ -24,7 +24,7 @@ class ForwarderConfigFrame(BaseFrame):
                            *args,
                            **kwargs)
 
-        self.__selected_record = StringVar(self.parent)
+        self._selected_record = StringVar(self.parent)
 
         self.cfg = Configuration()
 
@@ -72,17 +72,16 @@ class ForwarderConfigFrame(BaseFrame):
             row = self.record_frame.row.next()
 
             if select_next_row:
-                self.__selected_record.set(interface)
+                self._selected_record.set(interface)
                 select_next_row = False
 
-            self.nameserver_radio_list[interface] = \
-                self.radio_button(frame=self.record_frame,
-                                  text=interface,
-                                  variable=self.__selected_record,
-                                  value=interface,
-                                  row=row,
-                                  column=self.record_frame.column.start(),
-                                  sticky=W)
+            self.nameserver_radio_list[interface] = self.radio_button(frame=self.record_frame,
+                                                                      text=interface,
+                                                                      variable=self._selected_record,
+                                                                      value=interface,
+                                                                      row=row,
+                                                                      column=self.record_frame.column.start(),
+                                                                      sticky=W)
 
             self.label(frame=self.record_frame,
                        text=u', '.join(forwarders),
@@ -113,7 +112,7 @@ class ForwarderConfigFrame(BaseFrame):
                     name=u'_delete_record_button',
                     text=u'Delete',
                     width=button_width,
-                    command=self._delete_record,
+                    command=self._delete_forwarder,
                     row=self.button_frame.row.start(),
                     column=self.button_frame.column.start())
 
@@ -121,7 +120,7 @@ class ForwarderConfigFrame(BaseFrame):
                     name=u'_add_record_button',
                     text=u'Add',
                     width=button_width,
-                    command=self._add_record,
+                    command=self._add_forwarder,
                     row=self.button_frame.row.current,
                     column=self.button_frame.column.next())
 
@@ -129,13 +128,13 @@ class ForwarderConfigFrame(BaseFrame):
                     name=u'_edit_record_button',
                     text=u'Edit',
                     width=button_width,
-                    command=self._edit_record,
+                    command=self._edit_forwarder,
                     row=self.button_frame.row.current,
                     column=self.button_frame.column.next())
 
         nice_grid(self.button_frame)
 
-    def _add_record(self):
+    def _add_forwarder(self):
         window = AddEditForwarderWindow(fixed=True,
                                         parent_geometry=self.parent.winfo_toplevel().winfo_geometry())
 
@@ -149,12 +148,11 @@ class ForwarderConfigFrame(BaseFrame):
 
         self.parent.master.update_geometry()
 
-    def _edit_record(self):
-        window = AddEditForwarderWindow(
-                    selected_record=self.__selected_record.get(),
-                    edit=True,
-                    fixed=True,
-                    parent_geometry=self.parent.winfo_toplevel().winfo_geometry())
+    def _edit_forwarder(self):
+        window = AddEditForwarderWindow(selected_record=self._selected_record.get(),
+                                        edit=True,
+                                        fixed=True,
+                                        parent_geometry=self.parent.winfo_toplevel().winfo_geometry())
 
         window.transient()
         window.grab_set()
@@ -166,20 +164,27 @@ class ForwarderConfigFrame(BaseFrame):
 
         self.parent.master.update_geometry()
 
-    def _delete_record(self):
-        result = askquestion(u"Delete Record",
-                             u"Are you sure you want to delete {r}?".format(r=self.__selected_record.get()),
-                             icon=u'warning',
-                             parent=self)
+    def _delete_forwarder(self):
+        selected = self._selected_record.get()
 
-        if result == u'yes':
-            key = u'{cfg}.{int}'.format(cfg=dns_forwarders.DNS_SERVERS_CFG,
-                                        int=self.__selected_record.get())
+        if selected == AddEditForwarderFrame.DEFAULT_NETWORK:
+            showerror(title=u'Default Forwarder',
+                      message=u'You cannot delete the default forwarder!')
 
-            del self.cfg[key]
+        else:
+            result = askquestion(u"Delete Record",
+                                 u"Are you sure you want to delete {r}?".format(r=selected),
+                                 icon=u'warning',
+                                 parent=self)
 
-            self.record_frame.destroy()
-            self._build_record_frame()
-            self.nice_grid()
+            if result == u'yes':
+                key = u'{cfg}.{int}'.format(cfg=dns_forwarders.DNS_SERVERS_CFG,
+                                            int=selected)
 
-            self.parent.master.update_geometry()
+                del self.cfg[key]
+
+                self.record_frame.destroy()
+                self._build_record_frame()
+                self.nice_grid()
+
+                self.parent.master.update_geometry()
