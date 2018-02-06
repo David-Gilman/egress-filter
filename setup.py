@@ -96,6 +96,7 @@ setup(
         u'networkutil>=1.8.5',
         u'fdutil>=1.6.0',
         u'classutils>=1.5.0',
+        u'ipaddress>=1.0.19'
     ],
 
     # Reference any non-python files to be included here
