@@ -176,13 +176,11 @@ class AddEditRecordFrame(BaseFrame):
 
             redirect_environments.add(self.DEFAULT_REDIRECT)
 
-            try:
-                # Attempt to get friendly names
-                pass_through_environment = self.endpoints.get_environment_for_host(host)
-                redirect_environments.remove(pass_through_environment)
+            # Check for a friendly name for host
+            friendly_name = self._lookup_friendly_name(host)
 
-            except LookupError:
-                pass
+            if friendly_name is not None:
+                redirect_environments.remove(friendly_name)
 
             redirect_environments = sorted(list(redirect_environments))
 
@@ -225,3 +223,14 @@ class AddEditRecordFrame(BaseFrame):
                                              table_format=Table.LIGHT_TABLE_FORMAT).text() + u'\n'
 
         return tooltip_text
+
+    def _lookup_friendly_name(self,
+                              host):
+
+        try:
+            # Attempt to lookup friendly name
+            return self.endpoints.get_environment_for_host(host)
+
+        except LookupError:
+            logging.debug(u'No friendly name available for host: {host}'.format(host=host))
+            return None

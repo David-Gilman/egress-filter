@@ -97,12 +97,12 @@ class ZoneConfigFrame(BaseFrame):
             # Get the configured record
             text = host_config[u'redirect_host']
 
-            try:
-                # Attempt to lookup friendly name
-                text = self.endpoints.get_environment_for_host(text)
+            # Check for a friendly name for host
+            friendly_name = self._lookup_friendly_name(text)
 
-            except LookupError:
-                logging.debug(u'No friendly name available for host: {host}'.format(host=text))
+            if friendly_name is not None:
+                text = u'{name} ({host})'.format(name=friendly_name,
+                                                 host=text)
 
             self.record_frame.label(text=text,
                                     row=redirect_row,
@@ -225,3 +225,14 @@ class ZoneConfigFrame(BaseFrame):
                                          active=dns_lookup.ACTIVE)
 
         self.cfg[key] = flag.get()
+
+    def _lookup_friendly_name(self,
+                              host):
+
+        try:
+            # Attempt to lookup friendly name
+            return self.endpoints.get_environment_for_host(host)
+
+        except LookupError:
+            logging.debug(u'No friendly name available for host: {host}'.format(host=host))
+            return None
