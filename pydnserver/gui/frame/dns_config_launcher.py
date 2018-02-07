@@ -13,7 +13,7 @@ logging = logging_helper.setup_logging()
 class DNSConfigLauncherFrame(BaseLabelFrame):
 
     def __init__(self,
-                 title=u'DNS',
+                 title=u'DNS:',
                  *args,
                  **kwargs):
         super(DNSConfigLauncherFrame, self).__init__(title=title,
