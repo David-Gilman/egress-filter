@@ -23,14 +23,18 @@ class DNSConfigLauncherFrame(BaseLabelFrame):
         # TODO: Add buttons here
 
         Button(text=u"Forwarders",
+               width=12,
                sticky=EW,
                column=self.column.start(),
                command=self.launch_forwarder_config)
 
         Button(text=u"Zone",
+               width=12,
                sticky=EW,
                column=self.column.next(),
                command=self.launch_zone_config)
+
+        self.nice_grid()
 
     def launch_forwarder_config(self):
         ForwarderConfigWindow(fixed=True,
