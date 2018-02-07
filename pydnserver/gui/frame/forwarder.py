@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import logging_helper
-from tkinter.constants import HORIZONTAL, E, EW
+from tkinter.constants import HORIZONTAL, E, EW, NORMAL, DISABLED
 from tkinter.messagebox import showerror
 from tableutil import Table
 from collections import OrderedDict
@@ -58,6 +58,7 @@ class AddEditForwarderFrame(BaseFrame):
 
         self._network = IPv4NetworkEntry(frame=self,
                                          initial_value=(self.selected_record[u'interface'] if self.edit else u''),
+                                         state=DISABLED if self.edit else NORMAL,
                                          strict=False,
                                          row=self.row.current,
                                          column=self.column.next(),

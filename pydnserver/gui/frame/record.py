@@ -90,6 +90,7 @@ class AddEditRecordFrame(BaseFrame):
         self._redirect = Combobox(frame=self,
                                   initial_value=self.selected_host_config[dns_lookup.REDIRECT_HOST]
                                   if self.edit else u'',
+                                  state=NORMAL,
                                   row=self.row.current,
                                   column=self.column.next(),
                                   sticky=EW,
