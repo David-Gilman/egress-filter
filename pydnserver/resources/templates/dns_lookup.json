@@ -1,6 +1,14 @@
 {
-  "example.com": {
-    "redirect_host": "alt.example.com",
-    "active": false
+  "some-example.com": {
+    "redirect_host": "example.com",
+    "active": true
+  },
+  "this-server.com": {
+    "redirect_host": "default",
+    "active": true
+  },
+  "some-ip.com": {
+    "redirect_host": "1.2.3.4",
+    "active": true
   }
 }
