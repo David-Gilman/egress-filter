@@ -103,14 +103,17 @@ class DNSServer(ThreadPool):
             logging.debug(address)
             logging.debug(repr(request))
 
+            # Try to narrow down interface from client address
+            # We are assuming a /24 network as this is the most common for LAN's
+
             # Start with the server interface
             interface = self.interface
 
-            # Try to narrow down interface from client address
-            # We are assuming a /24 network as this is the most common for LAN's
+            # Get the client network to test our interfaces against
             client_net = IPv4Network(u'{ip}/24'.format(ip=address[0]),
                                      strict=False)
 
+            # Search for an interface address on the same network as the client
             for addr in get_my_addresses():
                 try:
                     if IPv4Address(u'{ip}'.format(ip=addr)) in client_net:
@@ -120,10 +123,12 @@ class DNSServer(ThreadPool):
                 except AddressValueError:
                     pass
 
+            # Create query
             query = DNSQuery(data=request,
                              client_address=address,
                              interface=interface)
 
+            # Make query & Respond to the client
             self.server_socket.sendto(query.resolve(), address)
 
             logging.info(query.message)
