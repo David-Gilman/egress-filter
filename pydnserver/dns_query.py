@@ -3,7 +3,7 @@
 import socket
 import dns.resolver
 import logging_helper
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, AddressValueError
 from .config import dns_lookup, dns_forwarders
 from ._exceptions import DNSQueryFailed
 
@@ -49,17 +49,19 @@ class DNSQuery(object):
             self.error = u'Cannot handle reverse lookups yet!'
             return self._bad_reply()
 
-        # Check if we have a configured record for requested name
+        # Check if we have a locally configured record for requested name
         try:
             redirect_record = dns_lookup.get_active_redirect_record_for_host(name)
 
         except dns_lookup.NoActiveRecordForHost:
+            # Forward request
             self.message += u'Forwarding request. '
             address = self._forward_request(name)
             self.ip = address
 
         else:
-            self._redirect_request(redirect_record)
+            # Attempt to resolve locally
+            self._resolve_request_locally(redirect_record)
 
         self.message = self.message.replace(u'?.?.?.?', self.ip.exploded)
 
@@ -80,29 +82,31 @@ class DNSQuery(object):
 
         return domain
 
-    def _redirect_request(self,
-                          redirect_host):
+    def _resolve_request_locally(self,
+                                 redirect_host):
 
-        #address = redirect_host[dns_lookup.REDIRECT_ADDRESS]
-        address = u''  # TODO: This functionality is removed... disabling (we may need the code elsewhere)
+        redirection = redirect_host[dns_lookup.REDIRECT_HOST]
 
-        if address != u'':  # TODO: Convert this to a None field!
-            if address.lower() == u'default':
-                address = self.interface
-                self.message += (u'Redirecting to default address.'.format(address=address))
-            else:
-                self.message += (u'Redirecting to address.'.format(address=address))
+        if redirection.lower() == u'default':
+            redirection = self.interface
+            self.message += (u'Redirecting to default address. '.format(address=redirection))
 
-            self.ip = address
+        # Check whether we already have an IP (A record)
+        # Note: For now we only support IPv4
+        try:
+            IPv4Address(u'{ip}'.format(ip=redirection))
 
-        else:
-            redirection = redirect_host[dns_lookup.REDIRECT_HOST]
-
+        except AddressValueError:
+            # Attempt to resolve CNAME
             redirected_address = self._forward_request(redirection)
 
-            self.message += (u'Redirecting to {redirection}'.format(redirection=redirection))
+        else:
+            # We already have the A record
+            redirected_address = redirection
 
-            self.ip = redirected_address
+        self.message += (u'Redirecting to {redirection} '.format(redirection=redirection))
+
+        self.ip = redirected_address
 
     def _forward_request(self,
                          name):
@@ -126,7 +130,7 @@ class DNSQuery(object):
             self.message += u"(socket). "
 
         except socket.gaierror as err:
-            raise DNSQueryFailed(u'Resolve using socket failed: {err}'.format(err=err))
+            raise DNSQueryFailed(u'Resolve using socket failed: {err} '.format(err=err))
 
         else:
             return address
@@ -136,11 +140,11 @@ class DNSQuery(object):
 
         try:
             forwarders = dns_forwarders.get_forwarders_by_interface(self.interface)
-            logging.debug(u'Using forwarder config: {fwd}'.format(fwd=forwarders))
+            logging.debug(u'Using forwarder config: {fwd} '.format(fwd=forwarders))
 
         except (dns_forwarders.NoForwardersConfigured, dns_forwarders.MultipleForwardersForInterface):
             forwarders = dns_forwarders.get_default_forwarder()
-            logging.debug(u'Using default forwarder config: {fwd}'.format(fwd=forwarders))
+            logging.debug(u'Using default forwarder config: {fwd} '.format(fwd=forwarders))
 
         resolver = dns.resolver.Resolver()
         resolver.timeout = 1
