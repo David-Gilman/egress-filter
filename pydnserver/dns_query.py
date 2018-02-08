@@ -88,6 +88,10 @@ class DNSQuery(object):
         redirection = redirect_host[dns_lookup.REDIRECT_HOST]
 
         if redirection.lower() == u'default':
+            if self.interface == u'0.0.0.0':  # This string is the DEFAULT_INTERFACE constant of DNSServer object!
+                self.error = u'Cannot resolve default as client interface could not be determined!'
+                return self._bad_reply()
+
             redirection = self.interface
             self.message += (u'Redirecting to default address. '.format(address=redirection))
 
