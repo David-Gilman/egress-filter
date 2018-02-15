@@ -1,13 +1,15 @@
 
 # Get module version
-from _metadata import __version__
+from ._metadata import __version__
 
 # Import key items from module
-from dns_server import DNSServer
-from dns_query import DNSQuery, DNSQueryFailed
+from .dns_server import DNSServer
+from .dns_query import DNSQuery
 
-import dns_lookup
-import dns_forwarders
+from ._exceptions import DNSQueryFailed
+
+from .config import dns_lookup
+from .config import dns_forwarders
 
 # Set default logging handler to avoid "No handler found" warnings.
 from logging import NullHandler, getLogger

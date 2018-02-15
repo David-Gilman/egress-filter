@@ -1,3 +1,4 @@
+# encoding: utf-8
 
 import os
 import re
@@ -36,8 +37,13 @@ setup(
 
     license=metadata.get(u'license'),
 
-    url=metadata.get(u'url'),
-    download_url=metadata.get(u'downloadurl'),
+    url=u'https://{host}/{user}/{repo}'.format(host=metadata.get(u'githost'),
+                                               user=metadata.get(u'gituser'),
+                                               repo=metadata.get(u'gitrepo')),
+    download_url=u'https://{host}/{user}/{repo}/get/{version}.tar'.format(host=metadata.get(u'githost'),
+                                                                          user=metadata.get(u'gituser'),
+                                                                          repo=metadata.get(u'gitrepo'),
+                                                                          version=metadata.get(u'version')),
 
     packages=find_packages(),
 
@@ -48,7 +54,7 @@ setup(
     description=metadata.get(u'description'),
     long_description=read(u'README.rst'),
 
-    keywords=[u'example'],
+    keywords=[u'dns'],
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -72,6 +78,8 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         u'Programming Language :: Python :: 2',
         u'Programming Language :: Python :: 2.7',
+        u'Programming Language :: Python :: 3',
+        u'Programming Language :: Python :: 3.6',
 
         u'Topic :: Utilities',
     ],
@@ -79,13 +87,16 @@ setup(
     # Dependencies
     install_requires=[
         u'pip>=8.1.2',
-        u'six>=1.11.0',
+        u'future>=0.16.0',
         u'dnspython>=1.14.0',
         u'logging-helper>=1.3.1',
         u'configurationutil>=1.2.3',
         u'tableutil>=1.0.13',
         u'uiutil>=1.6.4',
-        u'networkutil>=1.8.5'
+        u'networkutil>=1.8.5',
+        u'fdutil>=1.6.0',
+        u'classutils>=1.5.0',
+        u'ipaddress>=1.0.19'
     ],
 
     # Reference any non-python files to be included here

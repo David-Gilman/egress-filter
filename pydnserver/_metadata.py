@@ -1,22 +1,27 @@
+# encoding: utf-8
 
+# Variables for setup (these must be string only!)
 __module_name__ = u'PyDNServer'
+__description__ = u'Provides a very simple DNS server.'
 
-__version__ = u'1.1.4'
+__version__ = u'2.0.0'
 
 __author__ = u'Oli Davis & Hywel Thomas'
 __authorshort__ = u'OWBD_HT'
 __authoremail__ = u'oli.davis@me.com / hywel.thomas@mac.com'
 
-__copyright__ = u'Copyright (C) 2016 ' + __author__
 __license__ = u'MIT'
 
-__description__ = u'Provides a very simple DNS server.'
+__githost__ = u'bitbucket.org'
+__gituser__ = u'davisowb'
+__gitrepo__ = u'pydnserver.git'
 
-repo_user = u'davisowb'
-repo_name = u'pydnserver'
-__url__ = u'https://bitbucket.org/{user}/{repo}.git'.format(user=repo_user,
-                                                            repo=repo_name)  # Use the url to the git repo
-__downloadurl__ = u'https://bitbucket.org/{user}/' \
-                  u'{repo}.git/get/{version}.tar'.format(user=repo_user,
-                                                         repo=repo_name,
-                                                         version=__version__)
+
+# Additional variables
+__copyright__ = u'Copyright (C) 2016 {author}'.format(author=__author__)
+
+__url__ = u'https://{host}/{user}/{repo}'.format(host=__githost__,
+                                                 user=__gituser__,
+                                                 repo=__gitrepo__)
+__downloadurl__ = u'{url}/get/{version}.tar'.format(url=__url__,
+                                                    version=__version__)
