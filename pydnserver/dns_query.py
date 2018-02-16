@@ -149,7 +149,10 @@ class DNSQuery(object):
             forwarders = dns_forwarders.get_forwarders_by_interface(network.with_prefixlen)
             logging.debug(u'Using forwarder config: {fwd} '.format(fwd=forwarders))
 
-        except (dns_forwarders.NoForwardersConfigured, dns_forwarders.MultipleForwardersForInterface):
+        except (dns_forwarders.NoForwardersConfigured,
+                dns_forwarders.MultipleForwardersForInterface,
+                AddressValueError,
+                ValueError):
             forwarders = dns_forwarders.get_default_forwarder()
             logging.debug(u'Using default forwarder config: {fwd} '.format(fwd=forwarders))
 
