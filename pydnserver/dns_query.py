@@ -3,7 +3,7 @@
 import socket
 import dns.resolver
 import logging_helper
-from ipaddress import IPv4Address, AddressValueError
+from ipaddress import IPv4Address, IPv4Network, AddressValueError
 from .config import dns_lookup, dns_forwarders
 from ._exceptions import DNSQueryFailed
 
@@ -143,7 +143,10 @@ class DNSQuery(object):
                                          name):
 
         try:
-            forwarders = dns_forwarders.get_forwarders_by_interface(self.interface)
+            network = IPv4Network(u'{ip}/24'.format(ip=self.interface),
+                                  strict=False)
+
+            forwarders = dns_forwarders.get_forwarders_by_interface(network.with_prefixlen)
             logging.debug(u'Using forwarder config: {fwd} '.format(fwd=forwarders))
 
         except (dns_forwarders.NoForwardersConfigured, dns_forwarders.MultipleForwardersForInterface):
