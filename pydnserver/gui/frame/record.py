@@ -70,7 +70,7 @@ class AddEditRecordFrame(BaseFrame):
         initial_host = host_endpoints[0] if len(host_endpoints) > 0 else u''
 
         self._host = Combobox(frame=self,
-                              initial_value=self.selected_host if self.edit else initial_host,
+                              value=self.selected_host if self.edit else initial_host,
                               values=host_endpoints,
                               state=DISABLED if self.edit else NORMAL,
                               row=self.row.current,
@@ -88,7 +88,7 @@ class AddEditRecordFrame(BaseFrame):
               tooltip=self.tooltip)
 
         self._redirect = Combobox(frame=self,
-                                  initial_value=self.selected_host_config[dns_lookup.REDIRECT_HOST]
+                                  value=self.selected_host_config[dns_lookup.REDIRECT_HOST]
                                   if self.edit else u'',
                                   state=NORMAL,
                                   row=self.row.current,

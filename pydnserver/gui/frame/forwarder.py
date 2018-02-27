@@ -57,7 +57,7 @@ class AddEditForwarderFrame(BaseFrame):
                    tooltip=self.tooltip)
 
         self._network = IPv4NetworkEntry(frame=self,
-                                         initial_value=(self.selected_record[u'interface'] if self.edit else u''),
+                                         value=(self.selected_record[u'interface'] if self.edit else u''),
                                          state=DISABLED if self.edit else NORMAL,
                                          strict=False,
                                          row=self.row.current,
@@ -82,7 +82,7 @@ class AddEditForwarderFrame(BaseFrame):
                    tooltip=self.tooltip)
 
         self._forwarders = TextEntry(frame=self,
-                                     initial_value=u', '.join(self.selected_record[u'forwarders'])
+                                     value=u', '.join(self.selected_record[u'forwarders'])
                                      if self.edit
                                      else self.DEFAULT_FORWARDERS,
                                      row=self.row.current,
