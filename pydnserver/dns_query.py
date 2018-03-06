@@ -134,7 +134,9 @@ class DNSQuery(object):
             self.message += u"(socket). "
 
         except socket.gaierror as err:
-            raise DNSQueryFailed(u'Resolve using socket failed: {err} '.format(err=err))
+            raise DNSQueryFailed(u'Resolve name ({name}) using socket failed: {err} '
+                                 .format(name=name,
+                                         err=err))
 
         else:
             return address
