@@ -130,8 +130,8 @@ class AddEditRecordFrame(BaseFrame):
             if redirect_name.strip() == u'':
                 raise Exception(u'redirect host cannot be blank!')
 
-            self._convert_friendly_name_to_host(host=redirect_host,
-                                                name=redirect_name)
+            redirect_name = self._convert_friendly_name_to_host(host=redirect_host,
+                                                                name=redirect_name)
 
             values = {dns_lookup.REDIRECT_HOST: redirect_name,
                       dns_lookup.ACTIVE: self.selected_host_config[dns_lookup.ACTIVE] if self.edit else False}
