@@ -8,7 +8,7 @@ __version__ = u'2.0.0'
 
 __author__ = u'Oli Davis & Hywel Thomas'
 __authorshort__ = u'OWBD_HT'
-__authoremail__ = u'oli.davis@me.com / hywel.thomas@mac.com'
+__authoremail__ = u'oli.davis@me.com, hywel.thomas@mac.com'
 
 __license__ = u'MIT'
 
