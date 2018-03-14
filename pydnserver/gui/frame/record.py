@@ -183,7 +183,13 @@ class AddEditRecordFrame(BaseFrame):
                 selected_address = self.DEFAULT_REDIRECT
 
             self._redirect.config(values=address_list)
-            self._redirect.current(address_list.index(selected_address))
+
+            try:
+                self._redirect.current(address_list.index(selected_address))
+
+            except ValueError:
+                self._redirect.current(0)
+
             self._redirect.set(selected_address)
 
         except KeyError:
