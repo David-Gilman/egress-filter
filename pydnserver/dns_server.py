@@ -27,9 +27,7 @@ class DNSServer(ThreadPool):
         self.interface = interface
         self.port = port
 
-        self.server_socket = socket.socket(socket.AF_INET,
-                                           socket.SOCK_DGRAM)
-        self.server_socket.settimeout(1)
+        self.server_socket = None
 
         self._stop = True  # Set termination flag
         self._main_async_response = None
@@ -43,9 +41,7 @@ class DNSServer(ThreadPool):
         self._stop = False
 
         try:
-            self.server_socket.bind((self.interface,
-                                     self.port))
-            logging.debug(u'DNS Server socket bound')
+            self._create_socket()
 
         except Exception as err:
             logging.exception(err)
@@ -78,6 +74,8 @@ class DNSServer(ThreadPool):
 
         self.destroy()
 
+        self.server_socket = None
+
         logging.info(u'DNS Server Stopped')
 
     def _main_loop(self):
@@ -95,6 +93,17 @@ class DNSServer(ThreadPool):
 
             except socket.timeout:
                 continue
+
+    def _create_socket(self):
+        self.server_socket = socket.socket(socket.AF_INET,
+                                           socket.SOCK_DGRAM)
+
+        self.server_socket.settimeout(1)
+
+        self.server_socket.bind((self.interface,
+                                 self.port))
+
+        logging.debug(u'DNS Server socket bound')
 
     def _query(self,
                request,
