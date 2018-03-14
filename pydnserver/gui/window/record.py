@@ -13,11 +13,13 @@ class AddEditRecordWindow(ChildWindow):
     def __init__(self,
                  selected_record=None,
                  edit=False,
+                 address_list=None,
                  *args,
                  **kwargs):
 
         self.selected_record = selected_record
         self.edit = edit
+        self.address_list = address_list
 
         super(AddEditRecordWindow, self).__init__(*args,
                                                   **kwargs)
@@ -27,5 +29,6 @@ class AddEditRecordWindow(ChildWindow):
 
         self.config = AddEditRecordFrame(parent=self._main_frame,
                                          selected_record=self.selected_record,
-                                         edit=self.edit)
+                                         edit=self.edit,
+                                         address_list=self.address_list)
         self.config.grid(sticky=NSEW)

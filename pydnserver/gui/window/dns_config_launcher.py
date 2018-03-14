@@ -8,14 +8,19 @@ from ..frame.dns_config_launcher import DNSConfigLauncherFrame
 class _DNSConfigLauncherWindow(object):
 
     def __init__(self,
+                 zone_address_list=None,
                  *args,
                  **kwargs):
+
+        self.zone_address_list = zone_address_list
+
         super(_DNSConfigLauncherWindow, self).__init__(*args,
                                                        **kwargs)
 
     def _setup(self):
         self.title(u'DNS Config')
-        self.dynamic_frame = DNSConfigLauncherFrame(parent=self._main_frame)
+        self.dynamic_frame = DNSConfigLauncherFrame(parent=self._main_frame,
+                                                    zone_address_list=self.zone_address_list)
 
 
 class DNSConfigLauncherRootWindow(_DNSConfigLauncherWindow, RootWindow):

@@ -14,13 +14,15 @@ class DNSConfigLauncherFrame(BaseLabelFrame):
 
     def __init__(self,
                  title=u'DNS:',
+                 zone_address_list=None,
                  *args,
                  **kwargs):
+
+        self.zone_address_list = zone_address_list
+
         super(DNSConfigLauncherFrame, self).__init__(title=title,
                                                      *args,
                                                      **kwargs)
-
-        # TODO: Add buttons here
 
         Button(text=u"Forwarders",
                width=12,
@@ -42,4 +44,5 @@ class DNSConfigLauncherFrame(BaseLabelFrame):
 
     def launch_zone_config(self):
         ZoneConfigWindow(fixed=True,
-                         parent_geometry=self.parent.winfo_toplevel().winfo_geometry())
+                         parent_geometry=self.parent.winfo_toplevel().winfo_geometry(),
+                         address_list=self.zone_address_list)

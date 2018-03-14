@@ -10,7 +10,6 @@ from uiutil.widget.combobox import Combobox
 from configurationutil import Configuration
 from tkinter.messagebox import showerror
 from tkinter.constants import NORMAL, DISABLED, E, EW
-from networkutil.endpoint_config import Endpoints, EnvAndAPIs
 from fdutil.string_tools import make_multi_line_list
 from ...config import dns_lookup
 
@@ -19,13 +18,28 @@ logging = logging_helper.setup_logging()
 
 class AddEditRecordFrame(BaseFrame):
 
-    DEFAULT_REDIRECT = u''
+    DEFAULT_REDIRECT = u'default'
 
     def __init__(self,
                  selected_record=None,
                  edit=False,
+                 address_list=None,
                  *args,
                  **kwargs):
+
+        """
+
+        :param selected_record: (string)    The config key to use for the record.
+        :param edit:            (bool)      True if editing a record,
+                                            False if adding a new record.
+        :param address_list:     (list)     List of addresses to provide the user in the combobox,
+                                            where each entry in the list can be either:
+                                                --> (string) containing the address
+                                                --> (tuple)  containing the address and a display name
+                                                             e.g. ('google.co.uk', 'Google')
+        :param args:
+        :param kwargs:
+        """
 
         BaseFrame.__init__(self,
                            *args,
@@ -35,8 +49,9 @@ class AddEditRecordFrame(BaseFrame):
 
         self.cfg = Configuration()
 
-        self.endpoints = Endpoints()
-        self.env_and_apis = EnvAndAPIs()
+        self._addresses = {} if address_list is None else {(address[0] if isinstance(address, tuple) else address):
+                                                           (address[1] if isinstance(address, tuple) else u'')
+                                                           for address in address_list}
 
         try:
             key = u'{cfg}.{h}'.format(cfg=dns_lookup.DNS_LOOKUP_CFG,
@@ -63,15 +78,16 @@ class AddEditRecordFrame(BaseFrame):
 
         existing_endpoints = dns_lookup.get_redirection_config().keys()
 
-        host_endpoints = set([endpoint.hostname for endpoint in self.endpoints])
-        host_endpoints = list(host_endpoints.difference(existing_endpoints))
-        host_endpoints = sorted(host_endpoints)
+        host_addresses = set([address for address in self._addresses])
+        host_addresses = [self._lookup_display_name(addr)
+                          for addr in list(host_addresses.difference(existing_endpoints))]
+        host_addresses = sorted(host_addresses)
 
-        initial_host = host_endpoints[0] if len(host_endpoints) > 0 else u''
+        initial_host = host_addresses[0] if len(host_addresses) > 0 else u''
 
         self._host = Combobox(frame=self,
-                              value=self.selected_host if self.edit else initial_host,
-                              values=host_endpoints,
+                              value=self._lookup_display_name(self.selected_host) if self.edit else initial_host,
+                              values=host_addresses,
                               state=DISABLED if self.edit else NORMAL,
                               row=self.row.current,
                               column=self.column.next(),
@@ -88,15 +104,14 @@ class AddEditRecordFrame(BaseFrame):
               tooltip=self.tooltip)
 
         self._redirect = Combobox(frame=self,
-                                  value=self.selected_host_config[dns_lookup.REDIRECT_HOST]
+                                  value=self._lookup_display_name(self.selected_host_config[dns_lookup.REDIRECT_HOST])
                                   if self.edit else u'',
                                   state=NORMAL,
                                   row=self.row.current,
                                   column=self.column.next(),
                                   sticky=EW,
-                                  columnspan=3)
-
-        self.populate_redirect_list()
+                                  columnspan=3,
+                                  postcommand=self.populate_redirect_list)
 
         self.rowconfigure(self.row.current, weight=1)
 
@@ -120,8 +135,8 @@ class AddEditRecordFrame(BaseFrame):
                                    column=self.column.next())
 
     def _save(self):
-        redirect_host = self._host.value
-        redirect_name = self._redirect.value
+        redirect_host = self._lookup_address_from_display_name(self._host.value)
+        redirect_name = self._lookup_address_from_display_name(self._redirect.value)
 
         logging.debug(redirect_host)
         logging.debug(redirect_name)
@@ -130,20 +145,14 @@ class AddEditRecordFrame(BaseFrame):
             if redirect_name.strip() == u'':
                 raise Exception(u'redirect host cannot be blank!')
 
-            redirect_name = self._convert_friendly_name_to_host(host=redirect_host,
-                                                                name=redirect_name)
-
             values = {dns_lookup.REDIRECT_HOST: redirect_name,
                       dns_lookup.ACTIVE: self.selected_host_config[dns_lookup.ACTIVE] if self.edit else False}
+            logging.debug(values)
 
             key = u'{cfg}.{h}'.format(cfg=dns_lookup.DNS_LOOKUP_CFG,
                                       h=redirect_host)
 
-            logging.debug(values)
-
             self.cfg[key] = values
-
-            self.parent.master.exit()
 
         except Exception as err:
             logging.error(u'Cannot save record')
@@ -151,50 +160,31 @@ class AddEditRecordFrame(BaseFrame):
             showerror(title=u'Save Failed',
                       message=u'Cannot Save forwarder: {err}'.format(err=err))
 
+        else:
+            self.parent.master.exit()
+
     def _cancel(self):
         self.parent.master.exit()
 
     def populate_redirect_list(self):
-        host = self._host.value
+        address = self._lookup_address_from_display_name(self._host.value)
+
+        address_list = [self._lookup_display_name(addr)
+                        for addr in self._addresses
+                        if addr != address]
+        address_list.sort()
+        address_list.insert(0, self.DEFAULT_REDIRECT)
 
         try:
-            host_apis = self.endpoints.get_apis_for_host(host)
-
-            redirect_environments = set()
-
-            for host_api in host_apis:
-                redirect_environments.update(set(self.env_and_apis.get_environments_for_api(host_api)))
-
-            redirect_environments.add(self.DEFAULT_REDIRECT)
-
-            # Check for a friendly name for host
-            friendly_name = self._convert_host_to_friendly_name(host)
-
-            if friendly_name is not None:
-                redirect_environments.remove(friendly_name)
-
-            redirect_environments = sorted(list(redirect_environments))
-
             try:
-                redirect_hostname = self.selected_host_config[dns_lookup.REDIRECT_HOST]
+                selected_address = self._lookup_display_name(self.selected_host_config[dns_lookup.REDIRECT_HOST])
 
-                endpoint = [endpoint
-                            for endpoint in self.endpoints
-                            if endpoint.hostname == redirect_hostname
-                            ][0]
+            except TypeError:
+                selected_address = self.DEFAULT_REDIRECT
 
-                if endpoint.hostname == host:
-                    env = self.DEFAULT_REDIRECT
-
-                else:
-                    env = endpoint.environment
-
-            except (IndexError, TypeError):
-                env = self.DEFAULT_REDIRECT
-
-            self._redirect.config(values=redirect_environments)
-            self._redirect.current(redirect_environments.index(env))
-            self._redirect.set(env)
+            self._redirect.config(values=address_list)
+            self._redirect.current(address_list.index(selected_address))
+            self._redirect.set(selected_address)
 
         except KeyError:
             logging.error(u'Cannot load redirect list, Invalid hostname!')
@@ -215,38 +205,30 @@ class AddEditRecordFrame(BaseFrame):
 
         return tooltip_text
 
-    @staticmethod
-    def _convert_host_to_friendly_name(host):
+    def _lookup_display_name(self,
+                             address):
 
-        try:
-            # Attempt to lookup friendly name
-            return Endpoints().get_environment_for_host(host)
+        display_name = address
 
-        except LookupError:
-            logging.debug(u'No friendly name available for host: {host}'.format(host=host))
-            return None
+        # Check for a display name for host, accepting first match!
+        for addr in self._addresses:
+            if self._addresses[addr] and addr == address:
+                display_name = u'{name} ({host})'.format(name=self._addresses[addr],
+                                                         host=address)
+                break  # We found our name so move on!
 
-    @staticmethod
-    def _convert_friendly_name_to_host(host,
-                                       name):
+        return display_name
 
-        endpoints = Endpoints()
+    def _lookup_address_from_display_name(self,
+                                          display_name):
 
-        apis = endpoints.get_apis_for_host(host)
-        logging.debug(apis)
+        address = display_name
 
-        for api in apis:
-            try:
-                matched_endpoint = endpoints.get_endpoint_for_api_and_environment(
-                    api=api,
-                    environment=name)
+        if u'(' in display_name and display_name.endswith(u')'):
+            # we have a display name so attempt to decode
+            display, addr = display_name[:-1].split(u'(')  # [:-1] drops the ')'
 
-                logging.debug(matched_endpoint)
+            if display.strip() == self._addresses.get(addr):
+                address = addr
 
-                name = matched_endpoint.hostname
-                break  # We got one!
-
-            except ValueError:
-                pass
-
-        return name
+        return address

@@ -7,7 +7,6 @@ from tkinter.constants import HORIZONTAL, E, W, S, EW, NSEW
 from uiutil.frame import BaseFrame
 from uiutil.helper.layout import nice_grid
 from configurationutil import Configuration
-from networkutil.endpoint_config import Endpoints
 from ...config import dns_lookup
 from ..window.record import AddEditRecordWindow
 
@@ -17,8 +16,20 @@ logging = logging_helper.setup_logging()
 class ZoneConfigFrame(BaseFrame):
 
     def __init__(self,
+                 address_list=None,
                  *args,
                  **kwargs):
+
+        """
+
+        :param address_list: (list)  List of domains to provide the user in the combobox.
+                                     Each entry in the list can be either:
+                                         --> (string) containing the domain name
+                                         --> (tuple)  containing the domain name and a display name
+                                                      e.g. ('google.co.uk', 'Google')
+        :param args:
+        :param kwargs:
+        """
 
         BaseFrame.__init__(self,
                            *args,
@@ -27,6 +38,8 @@ class ZoneConfigFrame(BaseFrame):
         self._selected_record = StringVar(self.parent)
 
         self.cfg = Configuration()
+
+        self._address_list = [] if address_list is None else address_list
 
         self.dns_radio_list = {}
         self.dns_active_var_list = {}
@@ -85,7 +98,7 @@ class ZoneConfigFrame(BaseFrame):
             if not self._selected_record.get():
                 self._selected_record.set(host)
 
-            self.dns_radio_list[host] = self.record_frame.radiobutton(text=host,
+            self.dns_radio_list[host] = self.record_frame.radiobutton(text=self._lookup_display_name(host),
                                                                       variable=self._selected_record,
                                                                       value=host,
                                                                       row=redirect_row,
@@ -93,16 +106,7 @@ class ZoneConfigFrame(BaseFrame):
                                                                       sticky=W)
 
             # Get the configured record
-            text = host_config[u'redirect_host']
-
-            # Check for a friendly name for host
-            friendly_name = self._convert_host_to_friendly_name(text)
-
-            if friendly_name is not None:
-                text = u'{name} ({host})'.format(name=friendly_name,
-                                                 host=text)
-
-            self.record_frame.label(text=text,
+            self.record_frame.label(text=self._lookup_display_name(host_config[u'redirect_host']),
                                     row=redirect_row,
                                     column=middle_col,
                                     sticky=W)
@@ -112,9 +116,9 @@ class ZoneConfigFrame(BaseFrame):
 
             self.dns_active_list[host] = self.record_frame.checkbutton(
                 variable=self.dns_active_var_list[host],
-                command=(lambda host=host,
+                command=(lambda hst=host,
                          flag=self.dns_active_var_list[host]:
-                         self._update_active(host=host,
+                         self._update_active(host=hst,
                                              flag=flag)),
                 row=redirect_row,
                 column=right_col,
@@ -171,7 +175,8 @@ class ZoneConfigFrame(BaseFrame):
 
     def _add_zone_record(self):
         window = AddEditRecordWindow(fixed=True,
-                                     parent_geometry=(self.parent.winfo_toplevel().winfo_geometry()))
+                                     parent_geometry=(self.parent.winfo_toplevel().winfo_geometry()),
+                                     address_list=self._address_list)
 
         window.transient()
         window.grab_set()
@@ -186,7 +191,8 @@ class ZoneConfigFrame(BaseFrame):
         window = AddEditRecordWindow(selected_record=self._selected_record.get(),
                                      edit=True,
                                      fixed=True,
-                                     parent_geometry=(self.parent.winfo_toplevel().winfo_geometry()))
+                                     parent_geometry=(self.parent.winfo_toplevel().winfo_geometry()),
+                                     address_list=self._address_list)
 
         window.transient()
         window.grab_set()
@@ -224,13 +230,17 @@ class ZoneConfigFrame(BaseFrame):
 
         self.cfg[key] = flag.get()
 
-    @staticmethod
-    def _convert_host_to_friendly_name(host):
+    def _lookup_display_name(self,
+                             address):
 
-        try:
-            # Attempt to lookup friendly name
-            return Endpoints().get_environment_for_host(host)
+        display_name = address
 
-        except LookupError:
-            logging.debug(u'No friendly name available for host: {host}'.format(host=host))
-            return None
+        # Check for a display name for host, accepting first match!
+        for addr in self._address_list:
+            if isinstance(addr, tuple):
+                if address == addr[0] and addr[1]:
+                    display_name = u'{name} ({host})'.format(name=addr[1],
+                                                             host=address)
+                    break  # We found our name so move on!
+
+        return display_name
