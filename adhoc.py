@@ -2,8 +2,7 @@
 
 import logging_helper
 from configurationutil import Configuration, cfg_params
-from pydnserver._metadata import __version__, __authorshort__, __module_name__
-from pydnserver.gui.window.server import DNSServerRootWindow
+from pydnserver import DNSServerRootWindow, __version__, __authorshort__, __module_name__
 from future.utils import iteritems
 from apiutil.endpoints import Hosts
 
