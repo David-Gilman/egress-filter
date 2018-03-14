@@ -4,6 +4,7 @@ import logging_helper
 from configurationutil import Configuration, cfg_params
 from ipaddress import IPv4Network, IPv4Address
 from .._metadata import __version__, __authorshort__, __module_name__
+from .._exceptions import NoForwardersConfigured, MultipleForwardersForInterface
 from ..resources import templates, schema
 
 logging = logging_helper.setup_logging()
@@ -18,14 +19,6 @@ DNS_SERVERS_CFG = u'dns_forwarders'
 TEMPLATE = templates.dns_forwarders
 
 DEFAULT_FORWARDER = u'0.0.0.0'
-
-
-class NoForwardersConfigured(Exception):
-    pass
-
-
-class MultipleForwardersForInterface(Exception):
-    pass
 
 
 def get_all_forwarders(interface=None):

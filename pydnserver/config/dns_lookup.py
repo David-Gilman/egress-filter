@@ -3,6 +3,7 @@
 import logging_helper
 from configurationutil import Configuration, cfg_params
 from .._metadata import __version__, __authorshort__, __module_name__
+from .._exceptions import NoActiveRecordForHost
 from ..resources import templates, schema
 
 logging = logging_helper.setup_logging()
@@ -19,10 +20,6 @@ TEMPLATE = templates.dns_lookup
 # Constants for accessing config items
 REDIRECT_HOST = u'redirect_host'
 ACTIVE = u'active'
-
-
-class NoActiveRecordForHost(Exception):
-    pass
 
 
 def get_redirection_config(active_only=False):
