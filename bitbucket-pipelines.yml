@@ -2,8 +2,8 @@
 pipelines:
   default:
     - step:
-        name: Test Python 2.7.10
-        image: python:2.7.10
+        name: Test Python 2.7.14
+        image: python:2.7.14
         caches:
           - pip
         script:
@@ -20,8 +20,8 @@ pipelines:
   tags:
     '[0-9]*.[0-9]*.[0-9]*':
       - step:
-          name: Test Python 2.7.10
-          image: python:2.7.10
+          name: Test Python 2.7.14
+          image: python:2.7.14
           caches:
             - pip
           script:
