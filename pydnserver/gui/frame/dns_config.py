@@ -1,39 +1,39 @@
 # encoding: utf-8
 
 import logging_helper
-from tkinter.constants import EW
-from uiutil.frame.label import BaseLabelFrame
-from uiutil.widget.button import Button
+from uiutil.tk_names import EW
+from uiutil import BaseLabelFrame, Button, Position
 from ..window.forwarders import ForwarderConfigWindow
 from ..window.zone import ZoneConfigWindow
 
 logging = logging_helper.setup_logging()
 
 
-class DNSConfigLauncherFrame(BaseLabelFrame):
+class DNSConfigFrame(BaseLabelFrame):
+
+    BUTTON_WIDTH = 12
 
     def __init__(self,
-                 title=u'DNS:',
+                 title=u'DNS Config:',
                  zone_address_list=None,
                  *args,
                  **kwargs):
 
         self.zone_address_list = zone_address_list
 
-        super(DNSConfigLauncherFrame, self).__init__(title=title,
-                                                     *args,
-                                                     **kwargs)
+        super(DNSConfigFrame, self).__init__(title=title,
+                                             *args,
+                                             **kwargs)
 
         Button(text=u"Forwarders",
-               width=12,
+               width=self.BUTTON_WIDTH,
                sticky=EW,
-               column=self.column.start(),
                command=self.launch_forwarder_config)
 
         Button(text=u"Zone",
-               width=12,
+               width=self.BUTTON_WIDTH,
                sticky=EW,
-               column=self.column.next(),
+               column=Position.NEXT,
                command=self.launch_zone_config)
 
         self.nice_grid()

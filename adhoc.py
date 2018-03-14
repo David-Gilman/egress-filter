@@ -1,13 +1,18 @@
 # encoding: utf-8
 
 import logging_helper
-from pydnserver import DNSServer
-from configurationutil import Configuration
+from configurationutil import Configuration, cfg_params
+from pydnserver._metadata import __version__, __authorshort__, __module_name__
+from pydnserver.gui.window.server import DNSServerRootWindow
 from future.utils import iteritems
 from apiutil.endpoints import Hosts
 
-# Force config load!
-Configuration()
+
+# Register Config details (These are expected to be overwritten by an importing app)
+cfg_params.APP_NAME = __module_name__
+cfg_params.APP_AUTHOR = __authorshort__
+cfg_params.APP_VERSION = __version__
+Configuration()  # Force config load!
 
 logging = logging_helper.setup_logging(level=logging_helper.DEBUG,
                                        log_to_file=False)
@@ -18,17 +23,13 @@ address_list.insert(1, u'google.co.uk')
 address_list.append(u'bbc.co.uk')
 address_list.append((u'sky.com', u''))
 
-dns = DNSServer(port=9053)
-dns.start()
+dns = DNSServerRootWindow(server_kwargs=dict(port=9053),
+                          zone_address_list=address_list)
 
-logging.debug(u'READY')
-
+# Loop until Ctrl-C then shutdown.
 try:
-    from pydnserver.gui.window.dns_config_launcher import DNSConfigLauncherRootWindow
-    DNSConfigLauncherRootWindow(zone_address_list=address_list)
-
     while True:
         pass
 
 except KeyboardInterrupt:
-    dns.stop()
+    dns.server.server.stop()
