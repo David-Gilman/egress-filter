@@ -25,11 +25,3 @@ address_list.append((u'sky.com', u''))
 
 dns = DNSServerRootWindow(server_kwargs=dict(port=9053),
                           zone_address_list=address_list)
-
-# Loop until Ctrl-C then shutdown.
-try:
-    while True:
-        pass
-
-except KeyboardInterrupt:
-    dns.server.server.stop()
