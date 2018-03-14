@@ -92,7 +92,7 @@ setup(
         u'logging-helper>=1.3.1',
         u'configurationutil>=1.2.3',
         u'tableutil>=1.0.13',
-        u'uiutil>=1.6.4',
+        u'uiutil>=1.10.0',
         u'networkutil>=1.8.5',
         u'fdutil>=1.6.0',
         u'classutils>=1.5.0',
