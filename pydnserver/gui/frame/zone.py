@@ -98,18 +98,24 @@ class ZoneConfigFrame(BaseFrame):
             if not self._selected_record.get():
                 self._selected_record.set(host)
 
-            self.dns_radio_list[host] = self.record_frame.radiobutton(text=self._lookup_display_name(host),
+            dns_host_display_name = self._lookup_display_name(host)
+            self.dns_radio_list[host] = self.record_frame.radiobutton(text=dns_host_display_name
+                                                                      if dns_host_display_name else host,
                                                                       variable=self._selected_record,
                                                                       value=host,
                                                                       row=redirect_row,
                                                                       column=left_col,
-                                                                      sticky=W)
+                                                                      sticky=W,
+                                                                      tooltip=host if dns_host_display_name else u'')
 
             # Get the configured record
-            self.record_frame.label(text=self._lookup_display_name(host_config[u'redirect_host']),
+            dns_redirect_host = host_config[u'redirect_host']
+            dns_redirect_display_name = self._lookup_display_name(dns_redirect_host)
+            self.record_frame.label(text=dns_redirect_display_name if dns_redirect_display_name else dns_redirect_host,
                                     row=redirect_row,
                                     column=middle_col,
-                                    sticky=W)
+                                    sticky=W,
+                                    tooltip=dns_redirect_host if dns_redirect_display_name else u'')
 
             self.dns_active_var_list[host] = BooleanVar(self.parent)
             self.dns_active_var_list[host].set(host_config[u'active'])
@@ -233,14 +239,13 @@ class ZoneConfigFrame(BaseFrame):
     def _lookup_display_name(self,
                              address):
 
-        display_name = address
+        display_name = u''
 
         # Check for a display name for host, accepting first match!
         for addr in self._address_list:
             if isinstance(addr, tuple):
                 if address == addr[0] and addr[1]:
-                    display_name = u'{name} ({host})'.format(name=addr[1],
-                                                             host=address)
+                    display_name = addr[1]
                     break  # We found our name so move on!
 
         return display_name
