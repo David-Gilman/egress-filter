@@ -1,17 +1,14 @@
 {
   "example.com": {
-    "redirect_hostname": "alt.example.com",
-    "address": "default",
+    "redirect_host": "alt.example.com",
     "active": true
   },
   "example2.com": {
-    "redirect_hostname": "alt.example2.com",
-    "address": "default",
+    "redirect_host": "default",
     "active": false
   },
   "example3.com": {
-    "redirect_hostname": "alt.example3.com",
-    "address": "default",
+    "redirect_host": "alt.example3.com",
     "active": true
   }
 }
