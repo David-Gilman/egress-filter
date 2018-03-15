@@ -27,14 +27,14 @@ pipelines:
           script:
             - pip install $BITBUCKET_CLONE_DIR
             - python -m unittest discover $BITBUCKET_CLONE_DIR
-      #- step:
-      #    name: Test Python 3.6
-      #    image: python:3.6
-      #    caches:
-      #      - pip
-      #    script:
-      #      - pip install $BITBUCKET_CLONE_DIR
-      #      - python -m unittest discover $BITBUCKET_CLONE_DIR
+      - step:
+          name: Test Python 3.6
+          image: python:3.6
+          caches:
+            - pip
+          script:
+            - pip install $BITBUCKET_CLONE_DIR
+            - python -m unittest discover $BITBUCKET_CLONE_DIR
       - step:
           name: Create Distribution
           image: python:3.6
