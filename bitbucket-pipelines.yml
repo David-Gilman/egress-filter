@@ -50,7 +50,7 @@ pipelines:
             - dist/**
       - step:
           name: Deploy
-          trigger: manual
+          #trigger: manual
           image: python:3.6
           script:
             # Check for environment variables
