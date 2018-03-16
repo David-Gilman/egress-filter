@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+import os
+import sys
 import socket
 import logging_helper
 from classutils.thread_pool import ThreadPool
@@ -36,6 +38,11 @@ class DNSServer(ThreadPool):
 
         logging.info(u'Starting DNS Server on {int}:{port}...'.format(int=self.interface,
                                                                       port=self.port))
+
+        if (sys.platform == u'darwin'
+                and os.geteuid() != 0
+                and self.port <= 1024):
+            raise Exception(u'You are running macOS please restart with sudo!')
 
         # Run initialisation steps here
         self._stop = False
