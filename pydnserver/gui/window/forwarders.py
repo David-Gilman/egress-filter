@@ -16,7 +16,7 @@ class ForwarderConfigWindow(ChildWindow):
         super(ForwarderConfigWindow, self).__init__(*args,
                                                     **kwargs)
 
-    def _setup(self):
+    def _draw_widgets(self):
         self.title(u"Forwarder Configuration")
 
         self.config = ForwarderConfigFrame(parent=self._main_frame)

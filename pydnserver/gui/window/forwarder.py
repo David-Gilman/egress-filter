@@ -22,7 +22,7 @@ class AddEditForwarderWindow(ChildWindow):
         super(AddEditForwarderWindow, self).__init__(*args,
                                                      **kwargs)
 
-    def _setup(self):
+    def _draw_widgets(self):
         self.title(u"Add/Edit Forwarder")
 
         self.config = AddEditForwarderFrame(parent=self._main_frame,

@@ -28,7 +28,7 @@ class _DNSServerWindow(object):
         super(_DNSServerWindow, self).__init__(*args,
                                                **kwargs)
 
-    def _setup(self):
+    def _draw_widgets(self):
         self.title(u"DNS Server")
 
         self.server = DNSServerFrame(server=self.server,

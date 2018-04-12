@@ -17,7 +17,7 @@ class _DNSConfigWindow(object):
         super(_DNSConfigWindow, self).__init__(*args,
                                                **kwargs)
 
-    def _setup(self):
+    def _draw_widgets(self):
         self.title(u'DNS Config')
         self.dynamic_frame = DNSConfigFrame(parent=self._main_frame,
                                             zone_address_list=self.zone_address_list)

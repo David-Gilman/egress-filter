@@ -24,7 +24,7 @@ class AddEditRecordWindow(ChildWindow):
         super(AddEditRecordWindow, self).__init__(*args,
                                                   **kwargs)
 
-    def _setup(self):
+    def _draw_widgets(self):
         self.title(u"Add/Edit DNS Record")
 
         self.config = AddEditRecordFrame(parent=self._main_frame,
