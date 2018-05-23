@@ -89,14 +89,15 @@ setup(
         u'pip>=8.1.2',
         u'future>=0.16.0',
         u'dnspython>=1.14.0',
-        u'logging-helper>=1.8.3',
-        u'configurationutil>=1.2.3',
-        u'tableutil>=1.0.13',
-        u'uiutil>=1.16.1',
-        u'networkutil>=1.13.0',
-        u'fdutil>=1.7.8',
-        u'classutils>=1.5.5',
-        u'ipaddress>=1.0.19'
+        u'logging-helper>=1.8.4',
+        u'configurationutil[ui]>=3.3.0',
+        u'tableutil>=2.4.0',
+        u'uiutil>=1.20.7',
+        u'networkutil>=1.19.0',
+        u'fdutil>=1.8.1',
+        u'classutils>=1.11.3',
+        u'ipaddress>=1.0.19',
+        u'apiutil>=1.3.0'
     ],
 
     # Reference any non-python files to be included here
