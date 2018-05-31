@@ -19,6 +19,7 @@ logging = logging_helper.setup_logging()
 class AddEditRecordFrame(BaseFrame):
 
     DEFAULT_REDIRECT = u'default'
+    MAX_HOST_ADDRESS_WIDTH = 100
 
     def __init__(self,
                  selected_record=None,
@@ -85,12 +86,16 @@ class AddEditRecordFrame(BaseFrame):
 
         initial_host = host_addresses[0] if len(host_addresses) > 0 else u''
 
-        self._host = Combobox(frame=self,
-                              value=self._lookup_display_name(self.selected_host) if self.edit else initial_host,
+        width = min(max([len(ha) for ha in host_addresses]), self.MAX_HOST_ADDRESS_WIDTH)
+
+        self._host = Combobox(value=(self._lookup_display_name(self.selected_host)
+                                     if self.edit
+                                     else initial_host),
                               values=host_addresses,
                               state=DISABLED if self.edit else NORMAL,
                               row=self.row.current,
                               column=self.column.next(),
+                              width=width,
                               sticky=EW,
                               columnspan=3)
 
@@ -103,8 +108,7 @@ class AddEditRecordFrame(BaseFrame):
               sticky=E,
               tooltip=self.tooltip)
 
-        self._redirect = Combobox(frame=self,
-                                  value=self._lookup_display_name(self.selected_host_config[dns_lookup.REDIRECT_HOST])
+        self._redirect = Combobox(value=self._lookup_display_name(self.selected_host_config[dns_lookup.REDIRECT_HOST])
                                   if self.edit else u'',
                                   state=NORMAL,
                                   row=self.row.current,
