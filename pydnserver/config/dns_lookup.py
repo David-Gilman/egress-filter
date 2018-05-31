@@ -34,7 +34,8 @@ def get_redirection_config(active_only=False):
                  schema=schema.dns_lookup)
 
     dns_redirections = cfg.find(DNS_LOOKUP_CFG, [(ACTIVE, True)]) if active_only else cfg[DNS_LOOKUP_CFG]
-    logging.debug(dns_redirections)
+    logging_helper.LogLines(level=logging_helper.DEBUG,
+                            log_lines=dns_redirections)
 
     # Return a copy so that modifications of the retrieved do not get modified in config unless explicitly requested!
     return dns_redirections.copy()
