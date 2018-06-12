@@ -49,9 +49,12 @@ class DNSQuery(object):
             self.error = u'Cannot handle reverse lookups yet!'
             return self._bad_reply()
 
+        logging.debug(u'resolve name: {h}'.format(h=name))
+
         # Check if we have a locally configured record for requested name
         try:
             redirect_record = dns_lookup.get_active_redirect_record_for_host(name)
+            logging.debug(u'redirect record: {r}'.format(r=redirect_record))
 
         except dns_lookup.NoActiveRecordForHost:
             # Forward request
