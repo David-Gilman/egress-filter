@@ -98,8 +98,11 @@ class DNSServer(ThreadPool):
                                  kwargs={u'request': data,
                                          u'address': address})
 
-            except socket.timeout:
+            except (socket.timeout, socket.error):
                 continue
+
+            except Exception as err:
+                logging.error(u'Something went wrong in DNS Server main thread: {err}'.format(err=err))
 
     def _create_socket(self):
         self.server_socket = socket.socket(socket.AF_INET,
