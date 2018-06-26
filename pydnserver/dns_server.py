@@ -150,7 +150,7 @@ class DNSServer(ThreadPool):
             logging.info(query.message)
 
         except Exception as err:
-            logging.exception(err)
+            logging.error(err)
 
     @property
     def active(self):
