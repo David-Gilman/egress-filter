@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 import logging_helper
-from uiutil import Position, BaseFrame, Button
-from uiutil.tk_names import NORMAL, EW, showerror
+from uiutil import Position, BaseFrame, Button, Separator
+from uiutil.tk_names import NORMAL, EW, showerror, HORIZONTAL
 from ...dns_server import DNSServer
 from ..frame.dns_config import DNSConfigFrame
 from ..._constants import (START_SERVERS,
@@ -12,7 +12,7 @@ logging = logging_helper.setup_logging()
 
 
 class DNSServerFrame(BaseFrame):
-
+    AUTO_POSITION = HORIZONTAL
     BUTTON_WIDTH = 20
 
     def __init__(self,
@@ -35,7 +35,7 @@ class DNSServerFrame(BaseFrame):
                                          sticky=EW,
                                          zone_address_list=zone_address_list)
 
-        self.horizontal_separator()
+        Separator()
 
         self.start_stop_button = Button(state=NORMAL,
                                         value=START_SERVERS,

@@ -1,13 +1,11 @@
 # encoding: utf-8
 
 import logging_helper
-from tkinter.constants import HORIZONTAL, E, EW, NORMAL, DISABLED
+from uiutil.tk_names import HORIZONTAL, E, EW, NORMAL, DISABLED
 from tkinter.messagebox import showerror
 from tableutil import Table
 from collections import OrderedDict
-from uiutil.frame.frame import BaseFrame
-from uiutil.widget.button import Button
-from uiutil.widget.entry import TextEntry
+from uiutil import BaseFrame, Label, Button, TextEntry, Separator, Position
 from configurationutil import Configuration
 from networkutil.gui.ipv4_widget import IPv4NetworkEntry
 from networkutil.validation import valid_ipv4
@@ -19,6 +17,7 @@ logging = logging_helper.setup_logging()
 
 
 class AddEditForwarderFrame(BaseFrame):
+    AUTO_POSITION = HORIZONTAL
 
     DEFAULT_NETWORK = u'0.0.0.0'
     DEFAULT_FORWARDERS = u'8.8.8.8, 8.8.4.4'
@@ -50,18 +49,14 @@ class AddEditForwarderFrame(BaseFrame):
 
     def _draw(self):
 
-        self.label(text=u'Network:',
-                   row=self.row.next(),
-                   column=self.column.start(),
-                   sticky=E,
-                   tooltip=self.tooltip)
+        Label(text=u'Network:',
+              sticky=E,
+              tooltip=self.tooltip)
 
         self._network = IPv4NetworkEntry(frame=self,
                                          value=(self.selected_record[u'interface'] if self.edit else u''),
                                          state=DISABLED if self.edit else NORMAL,
                                          strict=False,
-                                         row=self.row.current,
-                                         column=self.column.next(),
                                          sticky=EW,
                                          columnspan=3,
                                          tooltip=Table.init_from_tree([u'The following are all the same:',
@@ -75,43 +70,29 @@ class AddEditForwarderFrame(BaseFrame):
                                                                       title=u'IP network',
                                                                       table_format=Table.LIGHT_TABLE_FORMAT).text())
 
-        self.label(text=u'Forwarders:',
-                   row=self.row.next(),
-                   column=self.column.start(),
-                   sticky=E,
-                   tooltip=self.tooltip)
+        Label(text=u'Forwarders:',
+              row=Position.NEXT,
+              sticky=E,
+              tooltip=self.tooltip)
 
         self._forwarders = TextEntry(frame=self,
-                                     value=u', '.join(self.selected_record[u'forwarders'])
-                                     if self.edit
-                                     else self.DEFAULT_FORWARDERS,
-                                     row=self.row.current,
-                                     column=self.column.next(),
+                                     value=(u', '.join(self.selected_record[u'forwarders'])
+                                            if self.edit
+                                            else self.DEFAULT_FORWARDERS),
                                      sticky=EW,
                                      columnspan=2,
                                      tooltip=u'comma separated list of nameserver addresses')
 
-        self.separator(orient=HORIZONTAL,
-                       row=self.row.next(),
-                       column=self.column.start(),
-                       columnspan=4,
-                       sticky=EW,
-                       padx=5,
-                       pady=5)
+        Separator()
 
-        self.column.start()
+        Button(text=u'Cancel',
+               command=self._cancel,
+               row=Position.NEXT,
+               sticky=EW)
 
-        self._cancel_button = Button(text=u'Cancel',
-                                     command=self._cancel,
-                                     row=self.row.next(),
-                                     column=self.column.next(),
-                                     sticky=EW)
-
-        self._save_button = Button(text=u'Save',
-                                   command=self._save,
-                                   row=self.row.current,
-                                   column=self.column.next(),
-                                   sticky=EW)
+        Button(text=u'Save',
+               command=self._save,
+               sticky=EW)
 
         self.nice_grid()
 

@@ -1,8 +1,8 @@
 # encoding: utf-8
 
 import logging_helper
-from uiutil.tk_names import EW
-from uiutil import BaseLabelFrame, Button, Position
+from uiutil.tk_names import EW, HORIZONTAL
+from uiutil import BaseLabelFrame, Button
 from ..window.forwarders import ForwarderConfigWindow
 from ..window.zone import ZoneConfigWindow
 
@@ -12,6 +12,7 @@ logging = logging_helper.setup_logging()
 class DNSConfigFrame(BaseLabelFrame):
 
     BUTTON_WIDTH = 12
+    AUTO_POSITION = HORIZONTAL
 
     def __init__(self,
                  title=u'DNS Config:',
@@ -33,7 +34,6 @@ class DNSConfigFrame(BaseLabelFrame):
         Button(text=u"Zone",
                width=self.BUTTON_WIDTH,
                sticky=EW,
-               column=Position.NEXT,
                command=self.launch_zone_config)
 
         self.nice_grid()

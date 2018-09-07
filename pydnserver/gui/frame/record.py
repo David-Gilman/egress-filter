@@ -3,13 +3,10 @@
 import logging_helper
 from tableutil import Table
 from collections import OrderedDict
-from uiutil.frame import BaseFrame
-from uiutil.widget.label import Label
-from uiutil.widget.button import Button
-from uiutil.widget.combobox import Combobox
+from uiutil.tk_names import NORMAL, DISABLED, READONLY, E, EW, HORIZONTAL
+from uiutil import BaseFrame, Label, Button, Combobox, Position, Separator
 from configurationutil import Configuration
 from tkinter.messagebox import showerror
-from tkinter.constants import NORMAL, DISABLED, E, EW
 from fdutil.string_tools import make_multi_line_list
 from ...config import dns_lookup
 
@@ -20,6 +17,7 @@ class AddEditRecordFrame(BaseFrame):
 
     DEFAULT_REDIRECT = u'default'
     MAX_HOST_ADDRESS_WIDTH = 100
+    AUTO_POSITION = HORIZONTAL
 
     def __init__(self,
                  selected_record=None,
@@ -71,12 +69,6 @@ class AddEditRecordFrame(BaseFrame):
 
     def _draw(self):
 
-        Label(text=u'Host:',
-              row=self.row.next(),
-              column=self.column.start(),
-              sticky=E,
-              tooltip=self.tooltip)
-
         existing_endpoints = dns_lookup.get_redirection_config().keys()
 
         host_addresses = set([address for address in self._addresses])
@@ -88,55 +80,51 @@ class AddEditRecordFrame(BaseFrame):
 
         width = min(max([len(ha) for ha in host_addresses]), self.MAX_HOST_ADDRESS_WIDTH)
 
-        self._host = Combobox(value=(self._lookup_display_name(self.selected_host)
-                                     if self.edit
-                                     else initial_host),
-                              values=host_addresses,
-                              state=DISABLED if self.edit else NORMAL,
-                              row=self.row.current,
-                              column=self.column.next(),
-                              width=width,
-                              sticky=EW,
-                              columnspan=3)
+        Label(text=u'Host:',
+              sticky=E,
+              tooltip=self.tooltip)
 
         self.rowconfigure(self.row.current, weight=1)
         self.columnconfigure(self.column.current, weight=1)
 
+        self._host = Combobox(editable=True,
+                              value=(self._lookup_display_name(self.selected_host)
+                                     if self.edit
+                                     else initial_host),
+                              values=host_addresses,
+                              state=DISABLED if self.edit else NORMAL,
+                              width=width,
+                              sticky=EW,
+                              columnspan=3)
+
         Label(text=u'Redirect:',
-              row=self.row.next(),
-              column=self.column.start(),
+              row=Position.NEXT,
               sticky=E,
               tooltip=self.tooltip)
 
-        self._redirect = Combobox(value=self._lookup_display_name(self.selected_host_config[dns_lookup.REDIRECT_HOST])
-                                  if self.edit else u'',
+        self.rowconfigure(self.row.current, weight=1)
+
+        self._redirect = Combobox(editable=self.edit,
+                                  value=(self._lookup_display_name(self.selected_host_config[dns_lookup.REDIRECT_HOST])
+                                         if self.edit
+                                         else u''),
                                   state=NORMAL,
-                                  row=self.row.current,
-                                  column=self.column.next(),
                                   sticky=EW,
                                   columnspan=3,
                                   postcommand=self.populate_redirect_list)
 
-        self.rowconfigure(self.row.current, weight=1)
+        Separator()
 
-        self.horizontal_separator(row=self.row.next(),
-                                  column=self.column.start(),
-                                  columnspan=4,
-                                  sticky=EW,
-                                  padx=5,
-                                  pady=5)
+        self.set_insert_position(row=Position.NEXT)
 
         self._cancel_button = Button(text=u'Cancel',
                                      width=15,
                                      command=self._cancel,
-                                     row=self.row.next(),
-                                     column=self.column.next())
+                                     column=Position.NEXT)
 
         self._save_button = Button(text=u'Save',
                                    width=15,
-                                   command=self._save,
-                                   row=self.row.current,
-                                   column=self.column.next())
+                                   command=self._save,)
 
     def _save(self):
         redirect_host = self._lookup_address_from_display_name(self._host.value)
@@ -186,15 +174,13 @@ class AddEditRecordFrame(BaseFrame):
             except TypeError:
                 selected_address = self.DEFAULT_REDIRECT
 
-            self._redirect.config(values=address_list)
+            self._redirect.values = address_list
 
             try:
-                self._redirect.current(address_list.index(selected_address))
+                self._redirect.value = selected_address
 
             except ValueError:
-                self._redirect.current(0)
-
-            self._redirect.set(selected_address)
+                self._redirect.value = address_list[0]
 
         except KeyError:
             logging.error(u'Cannot load redirect list, Invalid hostname!')
