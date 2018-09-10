@@ -12,7 +12,6 @@ logging = logging_helper.setup_logging()
 
 
 class DNSServerFrame(BaseFrame):
-    AUTO_POSITION = HORIZONTAL
     BUTTON_WIDTH = 20
 
     def __init__(self,
@@ -23,6 +22,7 @@ class DNSServerFrame(BaseFrame):
                  **kwargs):
 
         BaseFrame.__init__(self,
+                           layout=HORIZONTAL,
                            *args,
                            **kwargs)
 

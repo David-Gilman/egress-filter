@@ -12,7 +12,6 @@ logging = logging_helper.setup_logging()
 class DNSConfigFrame(BaseLabelFrame):
 
     BUTTON_WIDTH = 12
-    AUTO_POSITION = HORIZONTAL
 
     def __init__(self,
                  title=u'DNS Config:',
@@ -23,6 +22,7 @@ class DNSConfigFrame(BaseLabelFrame):
         self.zone_address_list = zone_address_list
 
         super(DNSConfigFrame, self).__init__(title=title,
+                                             layout=HORIZONTAL,
                                              *args,
                                              **kwargs)
 

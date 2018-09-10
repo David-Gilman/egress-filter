@@ -17,7 +17,6 @@ logging = logging_helper.setup_logging()
 
 
 class AddEditForwarderFrame(BaseFrame):
-    AUTO_POSITION = HORIZONTAL
 
     DEFAULT_NETWORK = u'0.0.0.0'
     DEFAULT_FORWARDERS = u'8.8.8.8, 8.8.4.4'
@@ -28,7 +27,10 @@ class AddEditForwarderFrame(BaseFrame):
                  *args,
                  **kwargs):
 
-        BaseFrame.__init__(self, *args, **kwargs)
+        BaseFrame.__init__(self,
+                           layout=HORIZONTAL,
+                           *args,
+                           **kwargs)
 
         self.edit = edit
 

@@ -12,8 +12,6 @@ logging = logging_helper.setup_logging()
 
 class ZoneRecordsFrame(BaseFrame):
 
-    AUTO_POSITION = HORIZONTAL
-
     def __init__(self,
                  cfg,
                  address_list,
@@ -27,6 +25,7 @@ class ZoneRecordsFrame(BaseFrame):
         """
 
         BaseFrame.__init__(self,
+                           layout=HORIZONTAL,
                            *args,
                            **kwargs)
 

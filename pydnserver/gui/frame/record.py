@@ -17,7 +17,6 @@ class AddEditRecordFrame(BaseFrame):
 
     DEFAULT_REDIRECT = u'default'
     MAX_HOST_ADDRESS_WIDTH = 100
-    AUTO_POSITION = HORIZONTAL
 
     def __init__(self,
                  selected_record=None,
@@ -41,6 +40,7 @@ class AddEditRecordFrame(BaseFrame):
         """
 
         BaseFrame.__init__(self,
+                           layout=HORIZONTAL,
                            *args,
                            **kwargs)
 
