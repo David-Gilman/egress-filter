@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 import logging_helper
-from uiutil.tk_names import HORIZONTAL, W, askquestion
+from uiutil.tk_names import HORIZONTAL, W, NSEW, askquestion
 from uiutil import BaseFrame, Position, Label, Separator, RadioButton, Switch, Button
 from configurationutil import Configuration
 from ...config import dns_lookup
@@ -33,6 +33,8 @@ class ZoneRecordsFrame(BaseFrame):
         self._address_list = address_list
 
         self.dns_active_list = {}
+
+        self.columnconfigure(self.column.current, weight=1)
 
         Label(text=u'Host',
               sticky=W)
@@ -135,10 +137,9 @@ class ZoneConfigFrame(BaseFrame):
 
         self._address_list = [] if address_list is None else address_list
 
-        self.columnconfigure(self.column.current, weight=1)
-
         self.zone_records_frame_position = dict(row=self.row.current,
-                                                column=self.row.current)
+                                                column=self.row.current,
+                                                sticky=NSEW)
         self._add_buttons()
         self.zone_records_frame_position['columnspan'] = self.column.max
         self._build_zone_records_frame()

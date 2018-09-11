@@ -4,7 +4,7 @@ import logging_helper
 from tableutil import Table
 from collections import OrderedDict
 from uiutil.tk_names import NORMAL, DISABLED, READONLY, E, EW, HORIZONTAL
-from uiutil import BaseFrame, Label, Button, Combobox, Position, Separator
+from uiutil import BaseFrame, Label, Button, Combobox, Position, Separator, Spacer
 from configurationutil import Configuration
 from tkinter.messagebox import showerror
 from fdutil.string_tools import make_multi_line_list
@@ -115,12 +115,11 @@ class AddEditRecordFrame(BaseFrame):
 
         Separator()
 
-        self.set_insert_position(row=Position.NEXT)
+        Spacer(columnspan=2)
 
         self._cancel_button = Button(text=u'Cancel',
                                      width=15,
-                                     command=self._cancel,
-                                     column=Position.NEXT)
+                                     command=self._cancel)
 
         self._save_button = Button(text=u'Save',
                                    width=15,

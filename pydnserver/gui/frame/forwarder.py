@@ -5,7 +5,7 @@ from uiutil.tk_names import HORIZONTAL, E, EW, NORMAL, DISABLED
 from tkinter.messagebox import showerror
 from tableutil import Table
 from collections import OrderedDict
-from uiutil import BaseFrame, Label, Button, TextEntry, Separator, Position
+from uiutil import BaseFrame, Label, Button, TextEntry, Separator, Position, Spacer
 from configurationutil import Configuration
 from networkutil.gui.ipv4_widget import IPv4NetworkEntry
 from networkutil.validation import valid_ipv4
@@ -20,6 +20,8 @@ class AddEditForwarderFrame(BaseFrame):
 
     DEFAULT_NETWORK = u'0.0.0.0'
     DEFAULT_FORWARDERS = u'8.8.8.8, 8.8.4.4'
+
+    BUTTON_WIDTH = 15
 
     def __init__(self,
                  selected_record=None,
@@ -55,8 +57,7 @@ class AddEditForwarderFrame(BaseFrame):
               sticky=E,
               tooltip=self.tooltip)
 
-        self._network = IPv4NetworkEntry(frame=self,
-                                         value=(self.selected_record[u'interface'] if self.edit else u''),
+        self._network = IPv4NetworkEntry(value=(self.selected_record[u'interface'] if self.edit else u''),
                                          state=DISABLED if self.edit else NORMAL,
                                          strict=False,
                                          sticky=EW,
@@ -77,23 +78,25 @@ class AddEditForwarderFrame(BaseFrame):
               sticky=E,
               tooltip=self.tooltip)
 
-        self._forwarders = TextEntry(frame=self,
-                                     value=(u', '.join(self.selected_record[u'forwarders'])
+        self._forwarders = TextEntry(value=(u', '.join(self.selected_record[u'forwarders'])
                                             if self.edit
                                             else self.DEFAULT_FORWARDERS),
                                      sticky=EW,
-                                     columnspan=2,
+                                     columnspan=3,
                                      tooltip=u'comma separated list of nameserver addresses')
 
         Separator()
 
+        Spacer()
+
         Button(text=u'Cancel',
                command=self._cancel,
-               row=Position.NEXT,
+               width=self.BUTTON_WIDTH,
                sticky=EW)
 
         Button(text=u'Save',
                command=self._save,
+               width=self.BUTTON_WIDTH,
                sticky=EW)
 
         self.nice_grid()
