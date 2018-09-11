@@ -97,7 +97,7 @@ setup(
         u'fdutil>=1.8.1',
         u'classutils>=1.11.3',
         u'ipaddress>=1.0.19',
-        u'apiutil>=1.3.0'
+        u'apiutil>=1.6.4'
     ],
 
     # Reference any non-python files to be included here
