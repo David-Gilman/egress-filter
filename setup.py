@@ -86,7 +86,7 @@ setup(
 
     # Dependencies
     install_requires=[
-        u'pip>=8.1.2',
+        u'pip>=18.1',
         u'future>=0.16.0',
         u'dnspython>=1.14.0',
         u'logging-helper>=1.8.4',
