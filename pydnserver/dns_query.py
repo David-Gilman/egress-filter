@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import sys
 import socket
 import dns.resolver
 import logging_helper
@@ -73,15 +74,26 @@ class DNSQuery(object):
     def _decode_query(self):
 
         domain = ''
-        optype = (ord(self.data[2]) >> 3) & 15   # Opcode bits
+        if sys.version_info.major == 2:
+            optype = (ord(self.data[2]) >> 3) & 15   # Opcode bits
 
-        if optype == 0:                     # Standard query
-            ini = 12
-            lon = ord(self.data[ini])
-            while lon != 0:
-                domain += self.data[ini + 1: ini + lon + 1] + '.'
-                ini += lon + 1
+            if optype == 0:                     # Standard query
+                ini = 12
                 lon = ord(self.data[ini])
+                while lon != 0:
+                    domain += self.data[ini + 1: ini + lon + 1] + '.'
+                    ini += lon + 1
+                    lon = ord(self.data[ini])
+        else:
+            optype = (self.data[2] >> 3) & 15  # Opcode bits
+
+            if optype == 0:  # Standard query
+                ini = 12
+                lon = self.data[ini]
+                while lon != 0:
+                    domain += self.data[ini + 1: ini + lon + 1].decode('latin-1') + '.'
+                    ini += lon + 1
+                    lon = self.data[ini]
 
         return domain
 
@@ -190,12 +202,12 @@ class DNSQuery(object):
 
     def _reply(self):
 
-        packet = ''
-        packet += self.data[:2] + "\x81\x80"
-        packet += self.data[4:6] + self.data[4:6] + '\x00\x00\x00\x00'      # Questions and Answers Counts
+        packet = b''
+        packet += self.data[:2] + b"\x81\x80"
+        packet += self.data[4:6] + self.data[4:6] + b'\x00\x00\x00\x00'     # Questions and Answers Counts
         packet += self.data[12:]                                            # Original Domain Name Question
-        packet += '\xc0\x0c'                                                # Pointer to domain name
-        packet += '\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'                # Response type, ttl and resource data length -> 4 bytes
+        packet += b'\xc0\x0c'                                               # Pointer to domain name
+        packet += b'\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04'               # Response type, ttl and resource data length -> 4 bytes
         packet += self.ip.packed                                            # 4 bytes of IP
 
         return packet

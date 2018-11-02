@@ -93,7 +93,7 @@ setup(
         u'configurationutil[ui]>=3.3.0',
         u'tableutil>=2.4.0',
         u'uiutil>=1.33.0',
-        u'networkutil>=1.19.0',
+        u'networkutil>=1.19.4',
         u'fdutil>=1.8.1',
         u'classutils>=1.11.3',
         u'ipaddress>=1.0.19',
