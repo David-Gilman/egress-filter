@@ -4,11 +4,28 @@ import sys
 import socket
 import dns.resolver
 import logging_helper
-from ipaddress import IPv4Address, IPv4Network, AddressValueError
+from ipaddress import IPv4Address, IPv4Network, AddressValueError, ip_address
 from .config import dns_lookup, dns_forwarders
 from ._exceptions import DNSQueryFailed
 
 logging = logging_helper.setup_logging()
+
+
+def move_address_to_another_network(address,
+                                    network,
+                                    netmask):
+
+    address = ip_address(unicode(address))
+    target_network = IPv4Network(u'{ip}/{netmask}'.format(ip=network,
+                                                          netmask=netmask),
+                                 strict=False)
+
+    network_bits = int(target_network.network_address)
+    interface_bits = int(address) & int(target_network.hostmask)
+
+    target_address = network_bits | interface_bits
+
+    return ip_address(target_address)
 
 
 class DNSQuery(object):
@@ -108,7 +125,19 @@ class DNSQuery(object):
                 return self._bad_reply()
 
             redirection = self.interface
-            self.message += (u'Redirecting to default address. '.format(address=redirection))
+            self.message += (u'Redirecting to default address. ({address}) '.format(address=redirection))
+
+        elif '/' in redirection:
+            if self.interface == u'0.0.0.0':  # This string is the DEFAULT_INTERFACE constant of DNSServer object!
+                self.error = (u'Cannot resolve {redirection} as client interface could not be determined!'
+                              .format(redirection=redirection))
+                return self._bad_reply()
+
+            address, netmask = redirection.split('/')
+            redirection = move_address_to_another_network(address=address,
+                                                          network=self.interface,
+                                                          netmask=netmask)
+            self.message += (u'Redirecting to {address}. '.format(address=redirection))
 
         # Check whether we already have an IP (A record)
         # Note: For now we only support IPv4
