@@ -55,6 +55,8 @@ class DNSServer(ThreadPool):
             logging.error(u'DNS Server failed to start, failed binding socket to destination '
                           u'({destination}:{port})'.format(destination=self.interface,
                                                            port=self.port))
+            if 'win' in sys.platform:
+                logging.error(u'The Internet Connection Sharing (ICS) service may have hijacked the port.')
 
             self._stop = True
 
