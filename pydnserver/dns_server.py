@@ -12,6 +12,15 @@ from .dns_query import DNSQuery
 logging = logging_helper.setup_logging()
 
 
+def ensure_unicode(s):
+    if isinstance(s, str):
+        try:
+            return s.decode('utf-8')
+        except Exception:
+            return ''.join([c if ord(c) < 128 else '?' for c in s])
+    return s
+
+
 class DNSServer(ThreadPool):
 
     DEFAULT_INTERFACE = u'0.0.0.0'
@@ -51,7 +60,7 @@ class DNSServer(ThreadPool):
             self._create_socket()
 
         except Exception as err:
-            logging.exception(err)
+            logging.exception(ensure_unicode(err.message))
             logging.error(u'DNS Server failed to start, failed binding socket to destination '
                           u'({destination}:{port})'.format(destination=self.interface,
                                                            port=self.port))
