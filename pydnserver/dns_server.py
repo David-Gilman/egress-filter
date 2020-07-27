@@ -8,6 +8,7 @@ from classutils.thread_pool import ThreadPool
 from ipaddress import IPv4Network, IPv4Address, AddressValueError
 from networkutil.addressing import get_my_addresses
 from .dns_query import DNSQuery
+from ._exceptions import DNSQueryFailed
 
 logging = logging_helper.setup_logging()
 
@@ -162,6 +163,9 @@ class DNSServer(ThreadPool):
             self.server_socket.sendto(query.resolve(), address)
 
             logging.info(query.message)
+
+        except DNSQueryFailed as err:
+            logging.error(err)
 
         except Exception as err:
             logging.exception(err)
