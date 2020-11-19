@@ -3,12 +3,23 @@
 import sys
 import socket
 import dns.resolver
+from dns.message import from_wire, make_response
+from dns.rcode import NXDOMAIN
 import logging_helper
 from ipaddress import IPv4Address, IPv4Network, AddressValueError, ip_address
 from .config import dns_lookup, dns_forwarders
 from ._exceptions import DNSQueryFailed
 
 logging = logging_helper.setup_logging()
+
+'81a70100000100000000000009676574706f636b65740363646e076d6f7a696c6c61036e657400001c0001'
+"\x81\xa7\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x09\x67\x65\x74" \
+"\x70\x6f\x63\x6b\x65\x74\x03\x63\x64\x6e\x07\x6d\x6f\x7a\x69\x6c" \
+"\x6c\x61\x03\x6e\x65\x74\x00\x00\x1c\x00\x01"
+
+"\x81\xa7\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x09\x67\x65\x74" \
+"\x70\x6f\x63\x6b\x65\x74\x03\x63\x64\x6e\x07\x6d\x6f\x7a\x69\x6c" \
+"\x6c\x61\x03\x6e\x65\x74\x00\x00\x1c\x00\x01"
 
 
 def move_address_to_another_network(address,
@@ -36,11 +47,23 @@ class DNSQuery(object):
                  interface=None):
 
         self.data = data
+        self.decoded = from_wire(data)
+        self.question = self.decoded.question[0]
+        # .question[0].rdtype=
+        #   covers=0
+        #   deleting=None
+        #   items=[]
+        #   name=www.google.com ['www','google','com','']
+        #   rdclass=1
+        #   rdtype=28
+        #   ttl=0
+
         self.client_address = client_address
         self.interface = interface if interface is not None else u'default'
         self.message = u''
         self._ip = None
         self.error = u''
+        # TODO: Handle IPV6, or at least throw an appropriate error if AAAA is received.
 
     @property
     def ip(self):
@@ -53,13 +76,9 @@ class DNSQuery(object):
 
     def resolve(self):
 
-        name = self._decode_query()
-
-        if name[-1] == u'.':
-            name = name[:-1]
-
+        name = self.question.name
         self.message = u'DNS ({dns}): {name}: ?.?.?.?. '.format(dns=self.interface,
-                                                                name=name)
+                                                                name=self.question.name)
 
         # Handle reverse lookups
         if u'.in-addr.arpa.' in name:
@@ -71,48 +90,30 @@ class DNSQuery(object):
 
         # Check if we have a locally configured record for requested name
         try:
-            redirect_record = dns_lookup.get_active_redirect_record_for_host(name)
+            redirect_record = dns_lookup.get_active_redirect_record_for_host(name.to_text())
             logging.debug(u'redirect record: {r}'.format(r=redirect_record))
 
         except dns_lookup.NoActiveRecordForHost:
             # Forward request
             self.message += u'Forwarding request. '
-            address = self._forward_request(name)
-            self.ip = address
-
+            answer = self._forward_request(name)
+            try:
+                answer.response.id = self.decoded.id
+            except AttributeError:
+                ip = 'NXDOMAIN'  # Don't know this for sure
+                encoded = answer.to_wire()
+            else:
+                ip = answer.response.answer[0].items[0]
+                encoded = answer.response.to_wire()
         else:
             # Attempt to resolve locally
-            self._resolve_request_locally(redirect_record)
+            answer = self._resolve_request_locally(redirect_record)
+            ip = answer.answer[0].items[0]
+            encoded = answer.to_wire()
 
-        self.message = self.message.replace(u'?.?.?.?', self.ip.exploded)
+        self.message = self.message.replace(u'?.?.?.?', str(ip))
 
-        return self._reply()
-
-    def _decode_query(self):
-
-        domain = ''
-        if sys.version_info.major == 2:
-            optype = (ord(self.data[2]) >> 3) & 15   # Opcode bits
-
-            if optype == 0:                     # Standard query
-                ini = 12
-                lon = ord(self.data[ini])
-                while lon != 0:
-                    domain += self.data[ini + 1: ini + lon + 1] + '.'
-                    ini += lon + 1
-                    lon = ord(self.data[ini])
-        else:
-            optype = (self.data[2] >> 3) & 15  # Opcode bits
-
-            if optype == 0:  # Standard query
-                ini = 12
-                lon = self.data[ini]
-                while lon != 0:
-                    domain += self.data[ini + 1: ini + lon + 1].decode('latin-1') + '.'
-                    ini += lon + 1
-                    lon = self.data[ini]
-
-        return domain
+        return encoded
 
     def _resolve_request_locally(self,
                                  redirect_host):
@@ -156,17 +157,30 @@ class DNSQuery(object):
 
         self.ip = redirected_address
 
+        # Use of make_response and appending rrset taken from
+        # https://programtalk.com/python-examples/dns.message.make_response/
+        response = make_response(self.decoded)
+        answer = dns.rrset.from_text(str(self.decoded.question[0].name),  # name
+                                     600,                                 # ttl
+                                     self.decoded.question[0].rdclass,    # rdclass
+                                     self.decoded.question[0].rdtype,     # rdtype
+                                     redirected_address)                  # *text_rdatas
+        response.answer.append(answer)
+
+        return response
+
     def _forward_request(self,
                          name):
 
         try:
-            address = self._resolve_name_using_dns_resolver(name)
+            response = self._resolve_name_using_dns_resolver(name)
 
-        except (dns_forwarders.NoForwardersConfigured, DNSQueryFailed):
+        except (dns_forwarders.NoForwardersConfigured, DNSQueryFailed) as err:
             self.message += u'No forwarders found for request. '
-            address = self._resolve_name_using_socket(name)
+            response = dns.message.make_response(self.decoded)
+            response.set_rcode(NXDOMAIN)
 
-        return address
+        return response
 
     def _resolve_name_using_socket(self,
                                    name):
@@ -174,7 +188,7 @@ class DNSQuery(object):
         # TODO: Ought to add some basic checking of name here
 
         try:
-            address = socket.gethostbyname(name)
+            address = socket.gethostbyname(str(name))
             self.message += u"(socket). "
 
         except socket.gaierror as err:
@@ -209,7 +223,8 @@ class DNSQuery(object):
 
         try:
             result = resolver.query(qname=name,
-                                    rdtype=u"A",
+                                    rdtype=self.question.rdtype,
+                                    rdclass=self.question.rdclass,
                                     source=self.interface)
 
             address = result[0].address
@@ -227,7 +242,7 @@ class DNSQuery(object):
             raise DNSQueryFailed(u'dns.resolver failed: {err}'.format(err=err))
 
         else:
-            return address
+            return result
 
     def _reply(self):
 
