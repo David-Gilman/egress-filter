@@ -4,7 +4,7 @@
 __module_name__ = u'PyDNServer'
 __description__ = u'Provides a very simple DNS server.'
 
-__version__ = u'2.3.3'
+__version__ = u'2.4.0'
 
 __author__ = u'Oli Davis & Hywel Thomas'
 __authorshort__ = u'OWBD_HT'

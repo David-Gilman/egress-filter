@@ -88,7 +88,7 @@ setup(
     install_requires=[
         u'pip>=18.1',
         u'future>=0.16.0',
-        u'dnspython>=1.14.0',
+        u'dnspython==1.16.0',
         u'logging-helper>=1.8.4',
         u'configurationutil[ui]>=3.3.0',
         u'tableutil>=2.4.0',
