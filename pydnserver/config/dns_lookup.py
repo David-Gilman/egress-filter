@@ -47,6 +47,8 @@ def get_active_redirection_config():
 
 def get_active_redirect_record_for_host(host):
 
+    host = host[:-1] if host.endswith('.') else host
+
     logging.debug(u'lookup active redirect record for {h}'.format(h=host))
 
     active_redirects = get_active_redirection_config()
