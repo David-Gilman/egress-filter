@@ -90,14 +90,14 @@ setup(
         u'future>=0.16.0',
         u'dnspython==1.16.0',
         u'logging-helper>=1.8.4',
-        u'configurationutil[ui]>=3.3.0',
+        u'configurationutil[ui]>=3.7.5',
         u'tableutil>=2.4.0',
         u'uiutil>=1.33.0',
         u'networkutil>=1.19.4',
         u'fdutil>=1.8.1',
         u'classutils>=1.11.3',
         u'ipaddress>=1.0.19',
-        u'apiutil>=1.6.4'
+        u'apiutil>=1.9.4'
     ],
 
     # Reference any non-python files to be included here
