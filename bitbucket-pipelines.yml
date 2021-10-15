@@ -2,16 +2,16 @@
 pipelines:
   default:
     - step:
-        name: Test Python 2.7.14
-        image: python:2.7.14
+        name: Test Python 2.7.18
+        image: python:2.7.18
         caches:
           - pip
         script:
           - pip install $BITBUCKET_CLONE_DIR
           - python -m unittest discover $BITBUCKET_CLONE_DIR
     - step:
-        name: Test Python 3.6
-        image: python:3.6
+        name: Test Python 3.9
+        image: python:3.9
         caches:
           - pip
         script:
@@ -20,16 +20,16 @@ pipelines:
   tags:
     '[0-9]*.[0-9]*.[0-9]*':
       - step:
-          name: Test Python 2.7.14
-          image: python:2.7.14
+          name: Test Python 2.7.18
+          image: python:2.7.18
           caches:
             - pip
           script:
             - pip install $BITBUCKET_CLONE_DIR
             - python -m unittest discover $BITBUCKET_CLONE_DIR
       - step:
-          name: Test Python 3.6
-          image: python:3.6
+          name: Test Python 3.9
+          image: python:3.9
           caches:
             - pip
           script:
@@ -37,7 +37,7 @@ pipelines:
             - python -m unittest discover $BITBUCKET_CLONE_DIR
       - step:
           name: Create Distribution
-          image: python:3.6
+          image: python:3.9
           script:
             - cd $BITBUCKET_CLONE_DIR
             # Check tag matches version
@@ -51,7 +51,7 @@ pipelines:
       - step:
           name: Deploy
           #trigger: manual
-          image: python:3.6
+          image: python:3.9
           script:
             # Check for environment variables
             - if [[ -z "$TWINE_REPOSITORY_URL" || -z "$TWINE_USERNAME" || -z "$TWINE_PASSWORD" ]]; then exit 1; fi
