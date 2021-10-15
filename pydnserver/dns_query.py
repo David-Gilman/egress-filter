@@ -237,7 +237,7 @@ class DNSQuery(object):
                                                                         interface=self.interface,
                                                                         address=address))
 
-        except (IndexError, dns.exception.DNSException, dns.exception.Timeout) as err:
+        except (IndexError, dns.exception.DNSException, dns.exception.Timeout, AttributeError) as err:
             self.message += u'(dns.resolver failed). '
             raise DNSQueryFailed(u'dns.resolver failed: {err}'.format(err=err))
 
