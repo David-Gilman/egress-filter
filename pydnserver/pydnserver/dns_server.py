@@ -9,6 +9,8 @@ from ipaddress import IPv4Network, IPv4Address, AddressValueError
 from networkutil.addressing import get_my_addresses
 from .dns_query import DNSQuery
 from ._exceptions import DNSQueryFailed
+from .allow_list import AllowList
+from .dns
 
 logging = logging_helper.setup_logging()
 
@@ -43,6 +45,10 @@ class DNSServer(ThreadPool):
 
         self._stop = True  # Set termination flag
         self._main_async_response = None
+
+        self.allow_list = AllowList({u'google.com.', u'aws.com.', u'microsoft.com.'})
+        self.
+        
 
     def start(self):
 
@@ -158,6 +164,11 @@ class DNSServer(ThreadPool):
             query = DNSQuery(data=request,
                              client_address=address,
                              interface=interface)
+
+            if self.allow_list.is_allowed(u'.'.join(str(query.question.name).split('.')[-3:])):
+                logging.info('Allowed query: {query.query.question.name')
+            else:
+                raise Exception(f"Not allowed query: {query.question.name}")
 
             # Make query & Respond to the client
             self.server_socket.sendto(query.resolve(), address)
