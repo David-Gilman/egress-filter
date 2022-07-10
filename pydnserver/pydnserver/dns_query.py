@@ -107,22 +107,24 @@ class DNSQuery(object):
             else:
                 ip = answer.response.answer[0].items[0]
                 encoded = answer.response.to_wire()
-            #logging.info(answer.response.answer[0])
+            self._set_rules(answer.response.answer[0])
 
         else:
             # Attempt to resolve locally
             answer = self._resolve_request_locally(redirect_record)
             ip = answer.answer[0].items[0]
             encoded = answer.to_wire()
-            #logging.info(answer.answer[0])
+            self._set_rules(answer.answer[0])
 
         self.message = self.message.replace(u'?.?.?.?', str(ip))
 
-        logging.info(ip)
-        if type(ip_address(ip)) is IPv4Address:
-            sg_client.set_rule(str(ip))
-
         return encoded
+
+    def _set_rules(self, ips, sg_client):
+        for ip in ips:
+            logging.info(ip)
+            if type(ip_address(ip)) is IPv4Address:
+                sg_client.set_rule(str(ip))
 
     def _resolve_request_locally(self,
                                  redirect_host):
