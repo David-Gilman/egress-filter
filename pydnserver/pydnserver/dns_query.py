@@ -107,14 +107,14 @@ class DNSQuery(object):
             else:
                 ip = answer.response.answer[0].items[0]
                 encoded = answer.response.to_wire()
-            self._set_rules(answer.response.answer[0])
+            self._set_rules(answer.response.answer[0], sg_client)
 
         else:
             # Attempt to resolve locally
             answer = self._resolve_request_locally(redirect_record)
             ip = answer.answer[0].items[0]
             encoded = answer.to_wire()
-            self._set_rules(answer.answer[0])
+            self._set_rules(answer.answer[0], sg_client)
 
         self.message = self.message.replace(u'?.?.?.?', str(ip))
 

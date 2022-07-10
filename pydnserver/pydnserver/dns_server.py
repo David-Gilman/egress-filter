@@ -172,7 +172,7 @@ class DNSServer(ThreadPool):
                 raise Exception(f"Not allowed query: {query.question.name}")
 
             # Make query & Respond to the client
-            self.server_socket.sendto(query.resolve(sg_client), address)
+            self.server_socket.sendto(query.resolve(self.sg_client), address)
 
             logging.info(query.message)
 
