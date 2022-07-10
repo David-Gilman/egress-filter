@@ -9,6 +9,7 @@ logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 
 ip = u'172.31.82.183'  # Set this to the IP address of your network interface.
 app = Flask(__name__)
+group_id = 'sg-020909fd2c5a43770'
 
 
 @app.route('/domains/', methods=['GET'])
@@ -33,8 +34,9 @@ def domain_delete(domain):
 
 if __name__ == '__main__':
     allow_list = AllowList({u'google.com.', u'aws.com.', u'microsoft.com.'})
+    sg_client = SGClient(group_id=group_id)
 
-    dns = DNSServer(allow_list=allow_list, interface=ip, port=53)
+    dns = DNSServer(allow_list=allow_list, sg_client=sg_client, interface=ip, port=53)
     dns.start()
 
     try:

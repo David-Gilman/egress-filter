@@ -10,6 +10,8 @@ from networkutil.addressing import get_my_addresses
 from .dns_query import DNSQuery
 from ._exceptions import DNSQueryFailed
 from allowlist.allow_list import AllowList
+from awsclient.sg_client import SGClient
+
 
 logging = logging_helper.setup_logging()
 
@@ -29,6 +31,7 @@ class DNSServer(ThreadPool):
 
     def __init__(self,
                  allow_list: AllowList,
+                 sg_client: SGClient,
                  interface=DEFAULT_INTERFACE,
                  port=DEFAULT_PORT,
                  *args,
@@ -46,6 +49,7 @@ class DNSServer(ThreadPool):
         self._main_async_response = None
 
         self.allow_list = allow_list
+        self.sg_client = sg_client
 
     def start(self):
 
@@ -168,7 +172,7 @@ class DNSServer(ThreadPool):
                 raise Exception(f"Not allowed query: {query.question.name}")
 
             # Make query & Respond to the client
-            self.server_socket.sendto(query.resolve(), address)
+            self.server_socket.sendto(query.resolve(sg_client), address)
 
             logging.info(query.message)
 
