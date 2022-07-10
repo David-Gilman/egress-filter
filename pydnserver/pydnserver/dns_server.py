@@ -163,7 +163,7 @@ class DNSServer(ThreadPool):
                              interface=interface)
 
             if self.allow_list.is_allowed(u'.'.join(str(query.question.name).split('.')[-3:])):
-                logging.info('Allowed query: {query.query.question.name')
+                logging.info(f'Allowed query: {query.question.name}')
             else:
                 raise Exception(f"Not allowed query: {query.question.name}")
 
