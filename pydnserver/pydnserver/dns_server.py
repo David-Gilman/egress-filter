@@ -9,8 +9,7 @@ from ipaddress import IPv4Network, IPv4Address, AddressValueError
 from networkutil.addressing import get_my_addresses
 from .dns_query import DNSQuery
 from ._exceptions import DNSQueryFailed
-from .allow_list import AllowList
-from .dns
+from allowlist.allow_list import AllowList
 
 logging = logging_helper.setup_logging()
 
@@ -25,11 +24,11 @@ def ensure_unicode(s):
 
 
 class DNSServer(ThreadPool):
-
     DEFAULT_INTERFACE = u'0.0.0.0'
-    DEFAULT_PORT = 53
+    DEFAULT_PORT = 100
 
     def __init__(self,
+                 allow_list: AllowList,
                  interface=DEFAULT_INTERFACE,
                  port=DEFAULT_PORT,
                  *args,
@@ -46,9 +45,7 @@ class DNSServer(ThreadPool):
         self._stop = True  # Set termination flag
         self._main_async_response = None
 
-        self.allow_list = AllowList({u'google.com.', u'aws.com.', u'microsoft.com.'})
-        self.
-        
+        self.allow_list = allow_list
 
     def start(self):
 
