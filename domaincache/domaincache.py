@@ -3,30 +3,23 @@ from datetime import datetime, timedelta
 
 class DomainCache:
     def __init__(self):
-        self.domain_mapping = {}
+        self.ip_ttls = {}
 
-    def set_domain(self, ip: str, domain: str, ttl: int = 0):
+    def set_domain(self, ip: str, ttl: int = 0):
         ttl_time = datetime.now() + timedelta(seconds=ttl)
+        self.ip_ttls.setdefault(ip, ttl_time)
 
-        if domain in self.domain_mapping:
-            self.domain_mapping[domain].append({'ip': ip, 'ttl': ttl_time})
-        else:
-            self.domain_mapping[domain] = [{'ip': ip, 'ttl': ttl_time}]
-
-    def is_ip_present(self, ip: str, domain: str):
+    def is_ip_present_and_valid(self, ip: str):
         now = datetime.now()
-
-        """        if domain in self.domain_mapping and ip in self.domain_mapping[domain]:
-        return now <="""
+        return ip in self.ip_ttls and now <= self.ip_ttls[ip]
 
     def get_and_del_expired_ips(self):
         now = datetime.now()
-        ips_to_return = set()
+        ips_to_return = []
 
-        for domain in self.domain_mapping:
-            for i, ip in enumerate(domain):
-                if ip['ttl'] < now:
-                    ips_to_return.add(ip['ip'])
-                    del domain[i]
+        for ip in list(self.ip_ttls.keys()):
+            if self.ip_ttls[ip] < now:
+                ips_to_return.append(ip)
+                del self.ip_ttls[ip]
 
         return ips_to_return

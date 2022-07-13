@@ -38,7 +38,7 @@ if __name__ == '__main__':
     sg_client = SGClient(group_id=group_id)
     domain_cache = DomainCache
 
-    dns = DNSServer(allow_list=allow_list, sg_client=sg_client, interface=ip, port=53)
+    dns = DNSServer(domain_cache=domain_cache, allow_list=allow_list, sg_client=sg_client, interface=ip, port=53)
     dns.start()
 
     try:

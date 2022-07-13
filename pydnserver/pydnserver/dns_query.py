@@ -108,6 +108,8 @@ class DNSQuery(object):
                 answer.response.answer[0].items[0] = ip
                 encoded = answer.response.to_wire()
             self._set_rules(ip, sg_client)
+            logging.debug(answer.response.items)
+            #self.domain_cache.set_domain()
 
         else:
             # Attempt to resolve locally

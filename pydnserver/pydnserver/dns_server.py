@@ -11,6 +11,7 @@ from .dns_query import DNSQuery
 from ._exceptions import DNSQueryFailed
 from allowlist.allow_list import AllowList
 from awsclient.sg_client import SGClient
+from domaincache.domaincache import DomainCache
 
 
 logging = logging_helper.setup_logging()
@@ -32,6 +33,7 @@ class DNSServer(ThreadPool):
     def __init__(self,
                  allow_list: AllowList,
                  sg_client: SGClient,
+                 domain_cache: DomainCache,
                  interface=DEFAULT_INTERFACE,
                  port=DEFAULT_PORT,
                  *args,
@@ -50,6 +52,7 @@ class DNSServer(ThreadPool):
 
         self.allow_list = allow_list
         self.sg_client = sg_client
+        self.domain_cache = domain_cache
 
     def start(self):
 
