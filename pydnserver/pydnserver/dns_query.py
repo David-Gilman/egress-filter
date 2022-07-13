@@ -75,7 +75,7 @@ class DNSQuery(object):
            ip):
         self._ip = IPv4Address(u'{ip}'.format(ip=ip))
 
-    def resolve(self, sg_client):
+    def resolve(self, sg_client, domain_cache):
 
         name = self.question.name
         self.message = u'DNS ({dns}): {name}: ?.?.?.?. '.format(dns=self.interface,
@@ -117,7 +117,7 @@ class DNSQuery(object):
             answer.answer[0].items[0] = ip
             encoded = answer.to_wire()
             self._set_rules(ip, sg_client)
-            self.domain_cache.set_ttl(ip, answer.ttl)
+            domain_cache.set_ttl(ip, answer.ttl)
 
         self.message = self.message.replace(u'?.?.?.?', str(ip))
 

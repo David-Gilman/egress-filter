@@ -5,7 +5,7 @@ class DomainCache:
     def __init__(self):
         self.ip_ttls = {}
 
-    def set_domain(self, ip: str, ttl: int = 0):
+    def set_(self, ip: str, ttl: int = 0):
         ttl_time = datetime.now() + timedelta(seconds=ttl)
         self.ip_ttls.setdefault(ip, ttl_time)
 
