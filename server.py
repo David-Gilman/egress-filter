@@ -36,7 +36,7 @@ def domain_delete(domain):
 if __name__ == '__main__':
     allow_list = AllowList({u'google.com.', u'aws.com.', u'microsoft.com.'})
     sg_client = SGClient(group_id=group_id)
-    domain_cache = DomainCache
+    domain_cache = DomainCache()
 
     dns = DNSServer(domain_cache=domain_cache, allow_list=allow_list, sg_client=sg_client, interface=ip, port=53)
     dns.start()
