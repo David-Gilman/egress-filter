@@ -124,8 +124,9 @@ class DNSQuery(object):
     def _set_rules(self, ip, sg_client, domain_cache, ttl):
         if type(ip_address(ip)) is IPv4Address:
             try:
-                sg_client.set_rule(str(ip))
-                domain_cache.set_ttl(ip, ttl)
+                if not domain_cache.is_ip_present_and_valid(str(ip)):
+                    sg_client.set_rule(str(ip))
+                    domain_cache.set_ttl(str(ip), ttl)
             except:
                 pass
 
