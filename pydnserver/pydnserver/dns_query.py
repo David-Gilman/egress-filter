@@ -10,7 +10,6 @@ from ipaddress import IPv4Address, IPv4Network, AddressValueError, ip_address
 from .config import dns_lookup, dns_forwarders
 from ._exceptions import DNSQueryFailed
 
-from awsclient.sg_client import SGClient
 
 logging = logging_helper.setup_logging()
 
@@ -106,25 +105,28 @@ class DNSQuery(object):
                 encoded = answer.to_wire()
             else:
                 ip = answer.response.answer[0].items[0]
+                answer.response.answer[0].items[0] = ip
                 encoded = answer.response.to_wire()
-            self._set_rules(answer.response.answer[0], sg_client)
+            self._set_rules(ip, sg_client)
 
         else:
             # Attempt to resolve locally
             answer = self._resolve_request_locally(redirect_record)
             ip = answer.answer[0].items[0]
+            answer.answer[0].items[0] = ip
             encoded = answer.to_wire()
-            self._set_rules(answer.answer[0], sg_client)
+            self._set_rules(ip, sg_client)
 
         self.message = self.message.replace(u'?.?.?.?', str(ip))
 
         return encoded
 
-    def _set_rules(self, ips, sg_client):
-        for ip in ips:
-            logging.info(ip)
-            if type(ip_address(ip)) is IPv4Address:
+    def _set_rules(self, ip, sg_client):
+        if type(ip_address(ip)) is IPv4Address:
+            try:
                 sg_client.set_rule(str(ip))
+            except:
+                pass
 
     def _resolve_request_locally(self,
                                  redirect_host):

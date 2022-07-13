@@ -13,6 +13,12 @@ class DomainCache:
         else:
             self.domain_mapping[domain] = [{'ip': ip, 'ttl': ttl_time}]
 
+    def is_ip_present(self, ip: str, domain: str):
+        now = datetime.now()
+
+        """        if domain in self.domain_mapping and ip in self.domain_mapping[domain]:
+        return now <="""
+
     def get_and_del_expired_ips(self) -> set[str]:
         now = datetime.now()
         ips_to_return = set()
