@@ -19,7 +19,7 @@ class DomainCache:
         """        if domain in self.domain_mapping and ip in self.domain_mapping[domain]:
         return now <="""
 
-    def get_and_del_expired_ips(self) -> set[str]:
+    def get_and_del_expired_ips(self):
         now = datetime.now()
         ips_to_return = set()
 
