@@ -107,8 +107,7 @@ class DNSQuery(object):
                 ip = answer.response.answer[0].items[0]
                 answer.response.answer[0].items[0] = ip
                 encoded = answer.response.to_wire()
-            self._set_rules(ip, sg_client)
-            logging.info(answer.ttl)
+            self._set_rules(ip, sg_client, domain_cache, answer.ttl)
 
         else:
             # Attempt to resolve locally
@@ -116,17 +115,17 @@ class DNSQuery(object):
             ip = answer.answer[0].items[0]
             answer.answer[0].items[0] = ip
             encoded = answer.to_wire()
-            self._set_rules(ip, sg_client)
-            domain_cache.set_ttl(ip, answer.ttl)
+            self._set_rules(ip, sg_client, domain_cache, answer.ttl)
 
         self.message = self.message.replace(u'?.?.?.?', str(ip))
 
         return encoded
 
-    def _set_rules(self, ip, sg_client):
+    def _set_rules(self, ip, sg_client, domain_cache, ttl):
         if type(ip_address(ip)) is IPv4Address:
             try:
                 sg_client.set_rule(str(ip))
+                domain_cache.set_ttl(ip, ttl)
             except:
                 pass
 
