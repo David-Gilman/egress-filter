@@ -12,6 +12,7 @@ from ._exceptions import DNSQueryFailed
 from allowlist.allow_list import AllowList
 from awsclient.sg_client import SGClient
 from domaincache.domaincache import DomainCache
+import time
 
 
 logging = logging_helper.setup_logging()
@@ -125,6 +126,18 @@ class DNSServer(ThreadPool):
 
             except Exception as err:
                 logging.error(u'Something went wrong in DNS Server main thread: {err}'.format(err=err))
+
+            if time.time() % 60 == 0:
+                logging.info('ping!')
+                self.submit_task(self._update_sg())
+
+    def _update_sg(self):
+        tbd = self.domain_cache.get_and_del_expired_ips()
+        for ip in tbd:
+            try:
+                self.sg_client.del_rule(str(ip))
+            except:
+                pass
 
     def _create_socket(self):
         self.server_socket = socket.socket(socket.AF_INET,
