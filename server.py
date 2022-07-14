@@ -34,7 +34,7 @@ def domain_delete(domain):
 
 
 if __name__ == '__main__':
-    allow_list = AllowList({u'google.com.', u'aws.com.', u'microsoft.com.'})
+    allow_list = AllowList({u'google.com.', u'aws.com.', u'example.com.'})
     sg_client = SGClient(group_id=group_id)
     domain_cache = DomainCache()
 

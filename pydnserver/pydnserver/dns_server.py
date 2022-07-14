@@ -113,9 +113,7 @@ class DNSServer(ThreadPool):
         logging.info(u'DNS ({dns}): Waiting for lookup requests'.format(dns=self.interface))
 
         while not self._stop:
-            logging.info(int(time.time()) % 60)
             if int(time.time()) % 60 == 0:
-                logging.info('ping!')
                 self.submit_task(self._update_sg())
 
             try:
@@ -134,10 +132,12 @@ class DNSServer(ThreadPool):
 
     def _update_sg(self):
         tbd = self.domain_cache.get_and_del_expired_ips()
+        logging.info(tbd)
         for ip in tbd:
             try:
                 self.sg_client.del_rule(str(ip))
-            except:
+            except Exception as e:
+                logging.error(e)
                 pass
 
     def _create_socket(self):
