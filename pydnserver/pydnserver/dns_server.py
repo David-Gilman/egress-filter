@@ -133,6 +133,7 @@ class DNSServer(ThreadPool):
     def _update_sg(self):
         tbd = self.domain_cache.get_and_del_expired_ips()
         logging.info(tbd)
+        logging.info(self.domain_cache.ip_ttls)
         for ip in tbd:
             try:
                 self.sg_client.del_rule(str(ip))
