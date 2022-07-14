@@ -105,7 +105,7 @@ class DNSQuery(object):
                 encoded = answer.to_wire()
             else:
                 ip = answer.response.answer[0].items[0]
-                answer.response.answer[0].items[0] = ip
+                answer.response.answer[0].items = [ip]
                 encoded = answer.response.to_wire()
             self._set_rules(ip, sg_client, domain_cache, answer.ttl)
 
@@ -113,7 +113,7 @@ class DNSQuery(object):
             # Attempt to resolve locally
             answer = self._resolve_request_locally(redirect_record)
             ip = answer.answer[0].items[0]
-            answer.answer[0].items[0] = ip
+            answer.answer[0].items = [ip]
             encoded = answer.to_wire()
             self._set_rules(ip, sg_client, domain_cache, answer.ttl)
 
