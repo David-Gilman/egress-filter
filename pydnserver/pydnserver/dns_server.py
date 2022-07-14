@@ -127,7 +127,7 @@ class DNSServer(ThreadPool):
             except Exception as err:
                 logging.error(u'Something went wrong in DNS Server main thread: {err}'.format(err=err))
 
-            if time.time() % 60 == 0:
+            if int(time.time()) % 60 == 0:
                 logging.info('ping!')
                 self.submit_task(self._update_sg())
 
@@ -189,9 +189,6 @@ class DNSServer(ThreadPool):
 
             # Make query & Respond to the client
             self.server_socket.sendto(query.resolve(self.sg_client, self.domain_cache), address)
-            logging.info('!!!')
-            logging.info(self.domain_cache.ip_ttls)
-            logging.info(query.message)
 
         except DNSQueryFailed as err:
             logging.error(err)

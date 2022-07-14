@@ -125,6 +125,7 @@ class DNSQuery(object):
         if type(ip_address(ip)) is IPv4Address:
             try:
                 if not domain_cache.is_ip_present_and_valid(str(ip)):
+                    logging.info(domain_cache.ip_ttls)
                     sg_client.set_rule(str(ip))
                     domain_cache.set_ttl(str(ip), ttl)
             except:
