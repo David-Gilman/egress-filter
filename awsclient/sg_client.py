@@ -17,7 +17,7 @@ class SGClient:
             ])
 
     def del_rule(self, ip: str):
-        self.client.client.revoke_security_group_egress(
+        self.client.revoke_security_group_egress(
             GroupId=self.group_id,
             IpPermissions=[
                 {'IpProtocol': 'tcp',
